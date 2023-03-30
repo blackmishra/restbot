@@ -2,8 +2,6 @@
 # exit on error
 set -o errexit
 
-pip install python==3.8
-
 echo "Installing the latest version of poetry..."
 
 pip install --upgrade pip
