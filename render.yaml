@@ -1,18 +1,18 @@
 databases:
-  - name: mysite
-    databaseName: mysite
-    user: mysite
+  - name: restaurantdb
+    databaseName: restaurantdb
+    user: shashank
 
 services:
   - type: web
-    name: mysite
+    name: resybookingproject
     env: python
     buildCommand: "./build.sh"
     startCommand: "gunicorn mysite.wsgi:application"
     envVars:
       - key: DATABASE_URL
         fromDatabase:
-          name: mysite
+          name: restaurantdb
           property: connectionString
       - key: SECRET_KEY
         generateValue: true
