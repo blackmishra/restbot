@@ -5,6 +5,7 @@ set -o errexit
 echo "Installing the latest version of poetry..."
 
 pip install --upgrade pip
+pip install celery
 
 pip install poetry==1.2.0
 
