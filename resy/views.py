@@ -29,12 +29,13 @@ class SearchTemplateView(TemplateView):
         '''
 
         url='https://api.resy.com/3/venuesearch/search'
+        current_date = datetime.date.today()
         payload = json.dumps({
             "availability": True,
             "page": 1,
             "per_page": 5000,
             "slot_filter": {
-                "day": "2023-04-21",
+                "day": current_date,
                 "party_size": 2
             },
             "types": [
@@ -416,35 +417,61 @@ class Make_Booking(APIView):
 
 
 class Add_Restaurant(APIView):
+    def get(self, request, *args, **kwargs):
+        self.context={'data':None}
+        return render(request, 'add_rest.html', self.context)
+
+
     def post(self, request, *args, **kwargs):
+        rest_name = request.data.get('rest_name')
+        print(rest_name)
+        current_date = str(datetime.date.today())
 
-        booking_token = request.data.get('booking_token')
+        url = "https://api.resy.com/3/venuesearch/search"
 
-        url = "https://api.resy.com/3/book"
-        tk='QiUOIvEqCPoSthioWtZQKQM0W8wwg8uMqJeiHA7E8jPXW6OE0ZJBOinEkv45hnCNzFoazKuqacAnY7RS2GeOanNzOl_uk7D3x_ty96MFsXXPfucTWztDX7Mc4FuSKhNOCeDymhNQVUSRMi4Kv9v0N4Z1i1S%7CiwbEQY2nMi23lYojd0QH2xSDyvnkZdMzbG%7CxLUJ_sJJ_mlI9haYpGlMytkkCQx2k2w_g0B0_cZYbtL9eM5lSIISpq7TZ1duZgK7zgCU181NwUoK%7CFS7optqkQyoVmYRapXdDazqGKKur%7CK0S46o4%7CdrFsDJJVlvlO6j2CO%7C_1CrekK6zxNRtBtQ_7phoaRfoLNf_oCPc47vZKywa0o9kiNou0bJufVTj%7Cbkd_S9juGL_NbfqV2avQYn5iGsDjeazIE4wylwpcIXpDex3kaVFMg6Xkbg6KfPNQ5lpCiPS04qQsxPeGCHbxxrRpsTjt2unVK_IzZh6cCTZ%7CZdbOXZQUclqif79z8Z7JAj5_6XbsnXWFoXkFXtRiHA6kvh7Xp9D2P%7CuWkkiTsSfIjEpT%7CLc7dTiL6NrYa8SEP4FPDEGbHKfyYFkXV%7CFf8nX7Ji1JCAdednyPKMj73pbzU17a460_PACU68j71SoqFcs83kfRqQFJ8ePxrgAYzlQdytn8_1NGlKzT7aUB0fDtsCriA_gtOObGwXJB9Vk8PbG-aa6c78da556300ef4530985951fab3f7f2075efbbc77bc10a79e682a'
-        payload=f'book_token={booking_token}&source_id=resy.com-venue-details'
-        
-        # add replace = 1 in payload to update booking slot
+        payload = json.dumps({
+        "geo": {
+            "latitude": 40.712941,
+            "longitude": -74.006393
+        },
+        "highlight": {
+            "pre_tag": "<b>",
+            "post_tag": "</b>"
+        },
+        "per_page": 5,
+        "query": rest_name,
+        "slot_filter": {
+            "day": current_date,
+            "party_size": 2
+        },
+        "types": [
+            "venue",
+            "cuisine"
+        ]
+        })
         headers = {
-            'authority': 'api.resy.com',
-            'accept': 'application/json, text/plain, */*',
-            'accept-language': 'en-GB,en;q=0.8',
-            'authorization': 'ResyAPI api_key="VbWk7s3L4KiK5fzlO7JD3Q5EYolJI7n5"',
-            'cache-control': 'no-cache',
-            'content-type': 'application/x-www-form-urlencoded',
-            'origin': 'https://widgets.resy.com',
-            'referer': 'https://widgets.resy.com/',
-            'sec-fetch-dest': 'empty',
-            'sec-fetch-mode': 'cors',
-            'sec-fetch-site': 'same-site',
-            'sec-gpc': '1',
-            'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
-            'x-origin': 'https://widgets.resy.com',
-            'x-resy-auth-token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJleHAiOjE2ODE5OTA3MDEsInVpZCI6NDAwMzk5NjMsImd0IjoiY29uc3VtZXIiLCJncyI6W10sImV4dHJhIjp7Imd1ZXN0X2lkIjoxMzIxNDYwMTl9fQ.AFsRxEXMVczhJA5rg3dY5w_lG2I2RjywWST3hSeTV6iwataTtiOgU8DYS0BEtjLfbv2ZP00tC-gTL1J2ocu7KSU5ANIW3nzu3Axn7LWFdYVrmD4uCD_WndQFbxRZTTveXfrlifFZLAw-ckNFZOpsxdcY1Q69YEqSNbvxuZEyNYF5m94F',
-            'x-resy-universal-auth': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJleHAiOjE2ODE5OTA3MDEsInVpZCI6NDAwMzk5NjMsImd0IjoiY29uc3VtZXIiLCJncyI6W10sImV4dHJhIjp7Imd1ZXN0X2lkIjoxMzIxNDYwMTl9fQ.AFsRxEXMVczhJA5rg3dY5w_lG2I2RjywWST3hSeTV6iwataTtiOgU8DYS0BEtjLfbv2ZP00tC-gTL1J2ocu7KSU5ANIW3nzu3Axn7LWFdYVrmD4uCD_WndQFbxRZTTveXfrlifFZLAw-ckNFZOpsxdcY1Q69YEqSNbvxuZEyNYF5m94F'
+        'authority': 'api.resy.com',
+        'accept': 'application/json, text/plain, */*',
+        'accept-language': 'en-GB,en;q=0.8',
+        'authorization': 'ResyAPI api_key="VbWk7s3L4KiK5fzlO7JD3Q5EYolJI7n5"',
+        'cache-control': 'no-cache',
+        'content-type': 'application/json',
+        'origin': 'https://resy.com',
+        'referer': 'https://resy.com/',
+        'sec-ch-ua': '"Brave";v="111", "Not(A:Brand";v="8", "Chromium";v="111"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Linux"',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-site',
+        'sec-gpc': '1',
+        'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36',
+        'x-origin': 'https://resy.com'
         }
-        print(payload)
+
         response = requests.request("POST", url, headers=headers, data=payload)
 
         data = response.json()
-        return Response(data, status=status.HTTP_201_CREATED)
+        if data['search']['hits']:
+            return Response(data, status=status.HTTP_201_CREATED)
+        return Response(data, status=status.HTTP_404_NOT_FOUND)

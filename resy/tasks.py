@@ -2,21 +2,16 @@ import datetime
 import json
 from celery import shared_task
 import requests
-from resy.models import Reservation_request
+from resy.models import Reservation_request, Restaurant
 from celery.utils.log import get_task_logger
+from rest_framework import status
 
 from resy.views import SearchTemplateView
 
 
 
 logger = get_task_logger(__name__)
-  
-@shared_task
-def add(x, y):
-    x=2
-    y=3
-    return x + y
-
+base_url='http://127.0.0.1:8000/restbot'
 
   
 @shared_task
@@ -100,7 +95,6 @@ def update_is_booking_date_flag():
 @shared_task
 def make_booking_req():
     book_reqs = Reservation_request.objects.filter(is_booking_date_active=True).values()
-    base_url='http://127.0.0.1:8000/restbot'
 
     for req in book_reqs:
         rest_id = int(req['rest_id'])
@@ -137,7 +131,17 @@ def make_booking_req():
         break
 
 
+@shared_task
+def update_restaurants():
+    Restaurant.objects.all().delete()
+    current_date = str(datetime.date.today())
 
-            
+    endpoint = f"{base_url}/fetch_and_add_rest"
 
+    response = requests.post(endpoint)
+    data = response.json()
+    if response.status==status.HTTP_201_CREATED:
+        logger.info("Restaurants List updated.")
+    else:
+        logger.info("Restaurants List could not be updated. Please try again.")
 

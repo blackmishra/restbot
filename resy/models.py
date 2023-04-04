@@ -21,8 +21,12 @@ class Restaurant(models.Model):
     updated_at = models.DateTimeField(auto_now = True)
     created_at = models.DateTimeField(auto_now_add = True)
 
+    class Meta:
+        ordering = ('rest_name',)
+
     def __str__(self):
         return self.rest_name
+    
 
 
 class Reservation_request(models.Model):
@@ -32,6 +36,9 @@ class Reservation_request(models.Model):
     number_of_guests = models.IntegerField(null=False, blank=False)
     booking_available_till = models.DateField(null=False, blank=False)
     is_booking_date_active = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ('rest_name',)
 
     def __str__(self):
         return self.rest_name

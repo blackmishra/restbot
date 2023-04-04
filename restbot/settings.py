@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-k#a0rtjxn1=e&@ez7vd@umuo6%vlhi0xvc-2@*e*w268fwgn&&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['673f-2405-201-1006-91dd-72cc-162b-d681-a767.in.ngrok.io', '127.0.0.1']
 
 # set the celery broker url
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'users.apps.UsersConfig',
+    'corsheaders',
     'rest_framework',
     'resy',
     'django_apscheduler',
@@ -71,6 +72,12 @@ DATABASES = {
     }
 }
 
+CSRF_COOKIE_DOMAIN = 'https://673f-2405-201-1006-91dd-72cc-162b-d681-a767.in.ngrok.io/'
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://673f-2405-201-1006-91dd-72cc-162b-d681-a767.in.ngrok.io/*',
+]
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -79,6 +86,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'restbot.urls'
@@ -105,12 +113,12 @@ WSGI_APPLICATION = 'restbot.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 
 # Password validation
