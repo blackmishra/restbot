@@ -22,14 +22,23 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = 'django-insecure-k#a0rtjxn1=e&@ez7vd@umuo6%vlhi0xvc-2@*e*w268fwgn&&'
-SECRET_KEY = os.environ.get('SECRET_KEY', default='your secret key')
+SECRET_KEY = 'django-insecure-k#a0rtjxn1=e&@ez7vd@umuo6%vlhi0xvc-2@*e*w268fwgn&&'
+# SECRET_KEY = os.environ.get('SECRET_KEY', default='your secret key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = True
-DEBUG = 'RENDER' not in os.environ
+DEBUG = True
+# DEBUG = 'RENDER' not in os.environ
 
 ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['673f-2405-201-1006-91dd-72cc-162b-d681-a767.in.ngrok.io', 
+                 '0532-2405-201-1006-91dd-62ea-525d-a60d-e100.in.ngrok.io',
+                 '127.0.0.1']
+CSRF_TRUSTED_ORIGINS = [
+    'https://673f-2405-201-1006-91dd-72cc-162b-d681-a767.in.ngrok.io/*',
+    'https://0532-2405-201-1006-91dd-62ea-525d-a60d-e100.in.ngrok.io/*'
+]
+
+
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 
 if RENDER_EXTERNAL_HOSTNAME:
@@ -152,11 +161,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'static/'
-# STATIC_ROOT = "/home/sas/Desktop/projects/resybookingproject/static/"
+STATIC_ROOT = "/home/sas/Desktop/projects/resybookingproject/static/"
 
-# STATICFILES_DIRS = (
-#     os.path.join(BASE_DIR, 'static'),
-# )
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'static'),
+)
 
 # STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 if not DEBUG:    # Tell Django to copy statics to the `staticfiles` directory
