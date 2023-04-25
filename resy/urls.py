@@ -1,5 +1,6 @@
 from django.urls import path, include
 from .views import (
+    Random_test,
     RestTemplateView,
     SearchTemplateView,
     Request_booking,
@@ -17,6 +18,9 @@ urlpatterns = [
     path('get_booking_token', Get_Booking_Token.as_view()),
     path('make_booking', Make_Booking.as_view()),
     path('add_rest', Add_Restaurant.as_view()),
+    path('home', Random_test.as_view()),
+
+
 
 
 
