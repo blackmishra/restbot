@@ -448,3 +448,9 @@ class Add_Restaurant(APIView):
 
         data = response.json()
         return Response(data, status=status.HTTP_201_CREATED)
+    
+
+class Random_test(APIView):
+    def get(self, request, *args, **kwargs):
+        return render(request, 'index.html', {'data': 'Default view is working.'})
+
