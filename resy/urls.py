@@ -10,7 +10,7 @@ from .views import (
 )
 
 urlpatterns = [
-    path('search', SearchTemplateView.as_view()),
+    path('', SearchTemplateView.as_view()),
     path('search/<int:rest_id>', RestTemplateView.as_view()),
     path('booking_req', Request_booking.as_view()),
     path('fetch_and_add_rest', Populate_Restaurants.as_view()),
