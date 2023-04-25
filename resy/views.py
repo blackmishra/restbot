@@ -20,7 +20,7 @@ class SearchTemplateView(TemplateView):
     # renderer_classes = [JSONRenderer]
 
    # 1. List all
-    template_name = 'default.html'
+    template_name = 'index.html'
     context={}
 
     def get_context_data(self, *args, **kwargs):
