@@ -59,5 +59,22 @@ class Reservation_request(models.Model):
             return True
         
     
+class Licenses_wo_add(models.Model):
+    business_legal_name = models.CharField(max_length = 180, null=True, blank=True)
+    state_license_number = models.CharField(max_length = 180, null=True, blank=True)
+    raw_license_type = models.CharField(max_length = 180, null=True, blank=True)
+    address = models.TextField(null=True, blank=True)
+    business_phone = models.CharField(max_length = 180, null=True, blank=True)
+    business_email = models.CharField(max_length = 180, null=True, blank=True)
+    status = models.CharField(max_length = 180, null=True, blank=True)
+    state = models.CharField(max_length = 180, null=True, blank=True)
+    rec_med = models.CharField(max_length = 180, null=True, blank=True)
+    cultivation_license_type = models.CharField(max_length = 180, null=True, blank=True)
+    med_num_patients = models.IntegerField(null=True, blank=True)
+    proposed_sf = models.IntegerField(null=True, blank=True)
+    state_population = models.IntegerField(null=True, blank=True)
+    updated_at = models.DateField()
 
-
+    class Meta:
+        managed = False
+        db_table = 'lic_wo_addresses'

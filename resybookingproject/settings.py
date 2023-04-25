@@ -29,13 +29,17 @@ SECRET_KEY = 'django-insecure-k#a0rtjxn1=e&@ez7vd@umuo6%vlhi0xvc-2@*e*w268fwgn&&
 DEBUG = True
 # DEBUG = 'RENDER' not in os.environ
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = []
 ALLOWED_HOSTS = ['673f-2405-201-1006-91dd-72cc-162b-d681-a767.in.ngrok.io', 
                  '0532-2405-201-1006-91dd-62ea-525d-a60d-e100.in.ngrok.io',
-                 '127.0.0.1']
+                 '127.0.0.1',
+                 '9111-2405-201-1006-91dd-5a82-4f4b-eb03-b54.ngrok-free.app'
+                 ]
 CSRF_TRUSTED_ORIGINS = [
     'https://673f-2405-201-1006-91dd-72cc-162b-d681-a767.in.ngrok.io/*',
-    'https://0532-2405-201-1006-91dd-62ea-525d-a60d-e100.in.ngrok.io/*'
+    'https://0532-2405-201-1006-91dd-62ea-525d-a60d-e100.in.ngrok.io/*',
+    'https://9111-2405-201-1006-91dd-5a82-4f4b-eb03-b54.ngrok-free.app/*'
+
 ]
 
 
@@ -48,16 +52,17 @@ if RENDER_EXTERNAL_HOSTNAME:
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
   
 # set the celery result backend
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/1'
 
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
+
   
 # set the celery timezone
 CELERY_TIMEZONE = 'UTC'
 
-
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 # Application definition
 
 INSTALLED_APPS = [
@@ -123,7 +128,11 @@ DATABASES = {
     'default': dj_database_url.config(
         default='postgresql://shashank:admin1234@localhost:5432/restaurantdb',
         conn_max_age=600    
-    )
+    ),
+    'pelorus': dj_database_url.config(
+        default='postgresql://postgres:WJANXFUftR*jdx2B.B7j@pelorus-test.cdymbctfoehe.us-west-2.rds.amazonaws.com:5432/postgres',
+        conn_max_age=600
+    ),
 }
 
 # Password validation

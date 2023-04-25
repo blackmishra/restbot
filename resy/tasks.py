@@ -2,7 +2,7 @@ import datetime
 import json
 from celery import shared_task
 import requests
-from resy.models import Reservation_request, Restaurant
+from resy.models import Licenses_wo_add, Reservation_request, Restaurant
 from celery.utils.log import get_task_logger
 from rest_framework import status
 from resy.views import SearchTemplateView
@@ -10,6 +10,11 @@ from resy.views import SearchTemplateView
 
 logger = get_task_logger(__name__)
 base_url='http://127.0.0.1:8000/restbot'
+oc_api_limit = 991
+open_corporates_key = 'oiuMXS7IR9uXFbXeeQ9D'
+google_maps_key = 'AIzaSyCMc9b59TwYBKOmiKgs5dpHQZnnysEp5tw'
+estated_key = 'oTg71JShNoudAaLsCKAaKaTD1sJMSn'
+
 
   
 @shared_task
@@ -139,10 +144,67 @@ def update_restaurants():
 
     response = requests.post(endpoint)
     data = response.json()
-    if response.status==status.HTTP_201_CREATED:
+    if response.status_code==201:
         logger.info("Restaurants List updated.")
     else:
         logger.info("Restaurants List could not be updated. Please try again.")
+
+
+def update_address(uuid, address):
+    # rec.address = address
+    try:
+        Licenses_wo_add.objects.get(id=uuid).using('pelorus').update(address=address)
+
+        # rec.save(save_fields=['address'])
+        logger.info('Record updated successfully.')
+        return True
+    except Exception as e:
+        logger.info('Could not update the record.')
+        return False
+
+
+@shared_task
+def fetch_addresses():
+    add_not_found_count=0
+    values = Licenses_wo_add.objects.all().values().using('pelorus')[:oc_api_limit]
+    logger.info('Printing results from Pelorus table.')
+    # Find business address from OpenCorporates when not available
+    for item in values:
+        business_name = str(item['business_legal_name'])
+        state_name = str(item['state'])
+        if item.get('address') is None:
+            
+            parameters = {
+                'api_token': open_corporates_key,
+                'q': business_name + ", "+ str(state_name),
+                'order': 'score'
+            }
+            response = requests.get('https://api.opencorporates.com/v0.4/companies/search', params=parameters)
+            response = response.json()
+            address = '~'
+            try:
+                if response['results'] and len(response['results']['companies']) > 0 and response['results']['companies'][0]['company']['registered_address_in_full']:
+                    address = response['results']['companies'][0]['company']['registered_address_in_full']
+                    logger.info(address)
+                    logger.info('Trying to update address of %s', item['id'])
+
+                    update_address(item['id'], address)
+
+                # item['address'] = address
+            except Exception as e:
+                logger.info('Could not found the address of %s', business_name)
+                add_not_found_count+=1
+
+    logger.info('Could not found the addresses of %s businesses', add_not_found_count)
+    return add_not_found_count, values
+
+
+
+
+
+
+
+
 
             
 

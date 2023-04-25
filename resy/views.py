@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import permissions
-from .models import Restaurant, Resy
+from .models import Licenses_wo_add, Restaurant, Resy
 from .serializers import BookingSerializer, RestaurantSerializer, ResySerializer
 from rest_framework.renderers import JSONRenderer
 from django.views.generic.base import TemplateView
@@ -246,12 +246,14 @@ class RestTemplateView(APIView):
 class Request_booking(APIView):
 
     def get(self, request, *args, **kwargs):
-
+        results = Licenses_wo_add.objects.all().values().using('pelorus')[:991]
+        print('Printing results from Pelorus table.')
+        print('Adress present') if results[0].get('address') else print("Address Not present")
         rest_objs = list(Restaurant.objects.all().values())
-        print(rest_objs)
+        # print(rest_objs)
         context = { 'data': rest_objs}
         # context = response.context_data
-        print(context)
+        # print(context)
 
         return render(request, 'booking.html', context) 
 
