@@ -21,77 +21,77 @@ class SearchTemplateView(TemplateView):
 
    # 1. List all
     template_name = 'default.html'
-    # context={}
+    context={}
 
-    # def get_context_data(self, *args, **kwargs):
-    #     '''
-    #     List all available restaurants.
-    #     '''
+    def get_context_data(self, *args, **kwargs):
+        '''
+        List all available restaurants.
+        '''
 
-    #     url='https://api.resy.com/3/venuesearch/search'
-    #     payload = json.dumps({
-    #         "availability": True,
-    #         "page": 1,
-    #         "per_page": 5000,
-    #         "slot_filter": {
-    #             "day": "2023-04-21",
-    #             "party_size": 2
-    #         },
-    #         "types": [
-    #             "venue"
-    #         ],
-    #         "geo": {
-    #             "latitude": 40.712941,
-    #             "longitude": -74.006393,
-    #             "radius": 35420
-    #         },
-    #         "query": ""
-    #     })
-    #     headers = {
-    #         'authority': 'api.resy.com',
-    #         'accept': 'application/json, text/plain, */*',
-    #         'accept-language': 'en-GB,en;q=0.8',
-    #         'authorization': 'ResyAPI api_key="VbWk7s3L4KiK5fzlO7JD3Q5EYolJI7n5"',
-    #         'cache-control': 'no-cache',
-    #         'content-type': 'application/json',
-    #         'origin': 'https://resy.com',
-    #         'referer': 'https://resy.com/',
-    #         'sec-fetch-dest': 'empty',
-    #         'sec-fetch-mode': 'cors',
-    #         'sec-fetch-site': 'same-site',
-    #         'sec-gpc': '1',
-    #         'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36',
-    #         'x-origin': 'https://resy.com',
-    #         # 'x-resy-auth-token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJleHAiOjE2Nzg0OTUwNzQsInVpZCI6Mzg4MDE2OTIsImd0IjoiY29uc3VtZXIiLCJncyI6W10sImV4dHJhIjp7Imd1ZXN0X2lkIjoxMjkyNjQ1MDZ9fQ.APZepm-Z5Yl8ECqA315ub0p11SJcvItCrrIZch1mNMrW3tEONvU9h2bLeodTaADeY6ojUzalNP9iQ40CKqhLWxUXAd-OUBqtsfwvSn2zukd14d9WZb1WuPZCPv_8D8jG--hMw3vVjJwvtLDwr0pAefqf_IIl7bzXc74tujLKN24DQRtC',
-    #         # 'x-resy-universal-auth': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJleHAiOjE2Nzg0OTUwNzQsInVpZCI6Mzg4MDE2OTIsImd0IjoiY29uc3VtZXIiLCJncyI6W10sImV4dHJhIjp7Imd1ZXN0X2lkIjoxMjkyNjQ1MDZ9fQ.APZepm-Z5Yl8ECqA315ub0p11SJcvItCrrIZch1mNMrW3tEONvU9h2bLeodTaADeY6ojUzalNP9iQ40CKqhLWxUXAd-OUBqtsfwvSn2zukd14d9WZb1WuPZCPv_8D8jG--hMw3vVjJwvtLDwr0pAefqf_IIl7bzXc74tujLKN24DQRtC'
-    #     }
-    #     response = requests.post(url, headers=headers, data = payload)
-    #     print(response.status_code)
-    #     # data = json.loads(response.json)
-    #     data = response.json()
-    #     # print(data)
+        url='https://api.resy.com/3/venuesearch/search'
+        payload = json.dumps({
+            "availability": True,
+            "page": 1,
+            "per_page": 5000,
+            "slot_filter": {
+                "day": "2023-04-21",
+                "party_size": 2
+            },
+            "types": [
+                "venue"
+            ],
+            "geo": {
+                "latitude": 40.712941,
+                "longitude": -74.006393,
+                "radius": 35420
+            },
+            "query": ""
+        })
+        headers = {
+            'authority': 'api.resy.com',
+            'accept': 'application/json, text/plain, */*',
+            'accept-language': 'en-GB,en;q=0.8',
+            'authorization': 'ResyAPI api_key="VbWk7s3L4KiK5fzlO7JD3Q5EYolJI7n5"',
+            'cache-control': 'no-cache',
+            'content-type': 'application/json',
+            'origin': 'https://resy.com',
+            'referer': 'https://resy.com/',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-site',
+            'sec-gpc': '1',
+            'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36',
+            'x-origin': 'https://resy.com',
+            # 'x-resy-auth-token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJleHAiOjE2Nzg0OTUwNzQsInVpZCI6Mzg4MDE2OTIsImd0IjoiY29uc3VtZXIiLCJncyI6W10sImV4dHJhIjp7Imd1ZXN0X2lkIjoxMjkyNjQ1MDZ9fQ.APZepm-Z5Yl8ECqA315ub0p11SJcvItCrrIZch1mNMrW3tEONvU9h2bLeodTaADeY6ojUzalNP9iQ40CKqhLWxUXAd-OUBqtsfwvSn2zukd14d9WZb1WuPZCPv_8D8jG--hMw3vVjJwvtLDwr0pAefqf_IIl7bzXc74tujLKN24DQRtC',
+            # 'x-resy-universal-auth': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJleHAiOjE2Nzg0OTUwNzQsInVpZCI6Mzg4MDE2OTIsImd0IjoiY29uc3VtZXIiLCJncyI6W10sImV4dHJhIjp7Imd1ZXN0X2lkIjoxMjkyNjQ1MDZ9fQ.APZepm-Z5Yl8ECqA315ub0p11SJcvItCrrIZch1mNMrW3tEONvU9h2bLeodTaADeY6ojUzalNP9iQ40CKqhLWxUXAd-OUBqtsfwvSn2zukd14d9WZb1WuPZCPv_8D8jG--hMw3vVjJwvtLDwr0pAefqf_IIl7bzXc74tujLKN24DQRtC'
+        }
+        response = requests.post(url, headers=headers, data = payload)
+        print(response.status_code)
+        # data = json.loads(response.json)
+        data = response.json()
+        # print(data)
 
-    #     # All values
-    #     values = []
-    #     for item in data['search']['hits']:
-    #         temp={}
-    #         temp['name'] = item['name'],
-    #         temp['id'] = item['id']['resy'],
-    #         temp['rating'] = round(item['rating']['average'], 2),
-    #         temp['image'] = item['images'][0] if item['images'] else 'https://upload.wikimedia.org/wikipedia/commons/d/d1/Image_not_available.png'
-    #         temp['region'] = item['region'],
-    #         temp['cuisine'] = item['cuisine'],
-    #         temp['availability_dates'] = item['inventory_any'],
-    #         temp['min_guests'] = item['min_party_size'],
-    #         temp['max_guests'] = item['max_party_size'],
-    #         temp['description'] = item['content'][0]['body']
+        # All values
+        values = []
+        for item in data['search']['hits']:
+            temp={}
+            temp['name'] = item['name'],
+            temp['id'] = item['id']['resy'],
+            temp['rating'] = round(item['rating']['average'], 2),
+            temp['image'] = item['images'][0] if item['images'] else 'https://upload.wikimedia.org/wikipedia/commons/d/d1/Image_not_available.png'
+            temp['region'] = item['region'],
+            temp['cuisine'] = item['cuisine'],
+            temp['availability_dates'] = item['inventory_any'],
+            temp['min_guests'] = item['min_party_size'],
+            temp['max_guests'] = item['max_party_size'],
+            temp['description'] = item['content'][0]['body']
 
-    #         values.append(temp)
+            values.append(temp)
 
-    #     # context = super(ResyTemplateView. self).get_context_data(*args, **kwargs)
-    #     values = sorted(values, key=lambda d: d['name']) 
-    #     self.context['data'] = values
-    #     return self.context
+        # context = super(ResyTemplateView. self).get_context_data(*args, **kwargs)
+        values = sorted(values, key=lambda d: d['name']) 
+        self.context['data'] = values
+        return self.context
 
 
     #     # print(config_token)
