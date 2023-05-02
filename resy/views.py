@@ -248,10 +248,10 @@ class Request_booking(APIView):
     def get(self, request, *args, **kwargs):
 
         rest_objs = list(Restaurant.objects.all().values())
-        print(rest_objs)
+        # print(rest_objs)
         context = { 'data': rest_objs}
         # context = response.context_data
-        print(context)
+        # print(context)
 
         return render(request, 'booking.html', context) 
 
@@ -268,14 +268,22 @@ class Request_booking(APIView):
             'booking_available_till': datetime.date.today(),
 
         }
-        print(data)
 
         serializer = BookingSerializer(data=data)
+        context = {}
+
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            context['result'] = serializer.data
+            context['message'] = 'Booking Request: Successfully created.'
+            print(context)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+            return render(request, context=context, status=status.HTTP_201_CREATED, template_name='booking.html')
+        context['result'] = serializer.errors
+        context['message'] = 'Booking Request: Failed to create.'
+        print(context)
+        return render(request, context={'result': serializer.errors}, status=status.HTTP_400_BAD_REQUEST, template_name='booking.html')
 
 
 
@@ -411,6 +419,7 @@ class Make_Booking(APIView):
         response = requests.request("POST", url, headers=headers, data=payload)
 
         data = response.json()
+
         return Response(data, status=status.HTTP_201_CREATED)
         # return render(request, 'index.html', {'data': data})
 
@@ -471,6 +480,24 @@ class Add_Restaurant(APIView):
         response = requests.request("POST", url, headers=headers, data=payload)
 
         data = response.json()
-        if data['search']['hits']:
-            return Response(data, status=status.HTTP_201_CREATED)
-        return Response(data, status=status.HTTP_404_NOT_FOUND)
+        records = data['search']['hits'][0]
+        if records:
+            obj_id = records['objectID']
+            try:
+                Restaurant.objects.get(rest_id=obj_id)
+                message = 'Restaurant already exists in DB.'
+            except Restaurant.DoesNotExist:
+                message = 'Congrats! New Restaurant found and inserted.'
+                data={}
+                data['rest_id'] = obj_id
+                data['rest_name'] = records['name']
+                serializer = RestaurantSerializer(data=data)
+                if serializer.is_valid():
+                    serializer.save()
+                    return render(request, context={'data': message}, status=status.HTTP_201_CREATED, template_name='add_rest.html')
+                return render(request, context={'data': serializer.errors}, status=status.HTTP_200_OK, template_name='add_rest.html')
+        else:
+            message="Could not find restaurant. Please try again.."
+        
+        return render(request, context={'data': message}, status=status.HTTP_200_OK, template_name='add_rest.html')
+                

@@ -24,6 +24,8 @@ class BookingSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def validate(self, data):
+        if data['number_of_guests']<1 or not data['number_of_guests']:
+            raise serializers.ValidationError("Please provide valid Table size.")
         if data['date'] < date.today():
             raise serializers.ValidationError("Date provided must be current or future.")
         return data

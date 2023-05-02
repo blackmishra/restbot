@@ -88,9 +88,11 @@
 
 													<input type="submit" value="Add Restaurant" name = "search_rest">
 													
+													
 
 													
 		                                    	</div>
+								{% if data %}<h4>{{ data }}</h4>{% endif %}
 												
 
 													
@@ -105,6 +107,10 @@
 
 		                    </form>
 		                </div>
+
+						<a class="btn btn-primary" href="/">Home</a>
+						<a class="btn btn-primary" href="/search">View All Restaurant(s) on RESY</a>
+
 		            </div> <!-- wizard container -->
 		        </div>
 	    	</div> <!-- row -->

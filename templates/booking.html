@@ -110,7 +110,14 @@
 										</div>
 		                            </div>
 		                            <div class="tab-pane" id="captain">
-		                                <h4 class="info-text">Number of guests you are expecting? </h4>
+		                                
+										
+										<div class="col-sm-6" rel="tooltip" title="Provide Table Size.">
+											<h4 class="info-text">Number of guests you are expecting? </h4>
+										</div>
+										<div class="col-sm-6" rel="tooltip" title="Provide Table Size.">
+											<input name="guests_size" type="text" class="form-control">	
+										</div>
 
 		                                <div class="row">
 											
@@ -140,17 +147,19 @@
 		                                        </div>
 												<div class="col-sm-4">
 		                                            <div class="choice" data-toggle="wizard-radio" rel="tooltip" title="Select this option if you are coming with your team.">
-
+														<input type="radio" name="numbr_guests" value="4">
 		                                                <div class="icon">
 		                                                    <i class="material-icons">tune</i>
-															<div class="form-group label-floating">
-																<label class="control-label">Custom</label>
-																<input name="guests_size" type="text" class="form-control">
-													  		</div>
-		                                                </div>
-		                                                
+														</div>
+														<h6>Custom Value</h6>
+															
+
 		                                            </div>
 		                                        </div>
+												
+												
+												
+
 
 		                                    </div>
 		                                </div>
@@ -182,6 +191,7 @@
 
 										<div class="footer-checkbox">
 											<div class="col-sm-12">
+												{% if data %}<h4>{{ data.message }}</h4>{% endif %}
 											  <div class="checkbox">
 												  <label>
 													  <input type="checkbox" name="optionsCheckboxes">

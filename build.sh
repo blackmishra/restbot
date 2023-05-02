@@ -8,7 +8,6 @@ pip install --upgrade pip
 pip install celery
 pip install djangorestframework
 pip install django-celery-beat
-pip install redis
 
 pip install poetry==1.2.0
 

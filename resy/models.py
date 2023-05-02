@@ -17,7 +17,7 @@ class Resy(models.Model):
 
 class Restaurant(models.Model):
     rest_name = models.CharField(max_length = 180, null=False, blank=False)
-    rest_id = models.IntegerField(null=False, blank=False)
+    rest_id = models.IntegerField(primary_key=True, default=0)
     updated_at = models.DateTimeField(auto_now = True)
     created_at = models.DateTimeField(auto_now_add = True)
 
@@ -26,8 +26,8 @@ class Restaurant(models.Model):
 
 
 class Reservation_request(models.Model):
-    rest_name = models.CharField(max_length = 180)
-    rest_id = models.IntegerField(default=0, null=False, blank=False)
+    rest_name = models.CharField(max_length = 180, null=False)
+    rest_id = models.IntegerField(null=False, blank=False)
     date = models.DateField(null=False, blank=False)
     number_of_guests = models.IntegerField(null=False, blank=False)
     booking_available_till = models.DateField(null=False, blank=False)
