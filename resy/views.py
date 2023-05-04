@@ -292,10 +292,7 @@ class Request_booking(APIView):
         print(context)
         return render(request, context={'result': serializer.errors}, status=status.HTTP_400_BAD_REQUEST, template_name='booking.html')
 
-
-
 class Populate_Restaurants(APIView):
-
     def get(self, request, *args, **kwargs):
 
         current_date = str(datetime.date.today())
@@ -360,7 +357,6 @@ class Get_Booking_Token(APIView):
         party_size = request.data.get('party_size')
 
         url = "https://api.resy.com/3/details"
-        # config_token[i] = "rgs://resy/64872/1981324/3/2023-03-25/2023-03-15/16:30:00/2/Dining Room"
         payload = json.dumps({
             "commit": 1,
             "config_id": config_token,
@@ -392,15 +388,12 @@ class Get_Booking_Token(APIView):
         booking_token = data['book_token']['value']
 
         return Response({'data':booking_token})
-    
 
 class Make_Booking(APIView):
     def post(self, request, *args, **kwargs):
-
         booking_token = request.data.get('booking_token')
-
+        auth_token = request.data.get('auth_token')
         url = "https://api.resy.com/3/book"
-        tk='QiUOIvEqCPoSthioWtZQKQM0W8wwg8uMqJeiHA7E8jPXW6OE0ZJBOinEkv45hnCNzFoazKuqacAnY7RS2GeOanNzOl_uk7D3x_ty96MFsXXPfucTWztDX7Mc4FuSKhNOCeDymhNQVUSRMi4Kv9v0N4Z1i1S%7CiwbEQY2nMi23lYojd0QH2xSDyvnkZdMzbG%7CxLUJ_sJJ_mlI9haYpGlMytkkCQx2k2w_g0B0_cZYbtL9eM5lSIISpq7TZ1duZgK7zgCU181NwUoK%7CFS7optqkQyoVmYRapXdDazqGKKur%7CK0S46o4%7CdrFsDJJVlvlO6j2CO%7C_1CrekK6zxNRtBtQ_7phoaRfoLNf_oCPc47vZKywa0o9kiNou0bJufVTj%7Cbkd_S9juGL_NbfqV2avQYn5iGsDjeazIE4wylwpcIXpDex3kaVFMg6Xkbg6KfPNQ5lpCiPS04qQsxPeGCHbxxrRpsTjt2unVK_IzZh6cCTZ%7CZdbOXZQUclqif79z8Z7JAj5_6XbsnXWFoXkFXtRiHA6kvh7Xp9D2P%7CuWkkiTsSfIjEpT%7CLc7dTiL6NrYa8SEP4FPDEGbHKfyYFkXV%7CFf8nX7Ji1JCAdednyPKMj73pbzU17a460_PACU68j71SoqFcs83kfRqQFJ8ePxrgAYzlQdytn8_1NGlKzT7aUB0fDtsCriA_gtOObGwXJB9Vk8PbG-aa6c78da556300ef4530985951fab3f7f2075efbbc77bc10a79e682a'
         payload=f'book_token={booking_token}&source_id=resy.com-venue-details'
         
         # add replace = 1 in payload to update booking slot
@@ -420,17 +413,15 @@ class Make_Booking(APIView):
             'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
             'x-origin': 'https://widgets.resy.com'
             }
-        # headers['x-resy-auth-token'] = 
-        # headers['x-resy-universal-auth'] = 
+        headers['x-resy-auth-token'] = auth_token
+        headers['x-resy-universal-auth'] = auth_token
 
-        print(payload)
         response = requests.request("POST", url, headers=headers, data=payload)
-
-        data = response.json()
-
-        return Response(data, status=status.HTTP_201_CREATED)
-        # return render(request, 'index.html', {'data': data})
-
+        if response.status==status.HTTP_201_CREATED:
+            data = response.json()
+            return Response(data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
 class Add_Restaurant(APIView):
     def get(self, request, *args, **kwargs):

@@ -100,6 +100,7 @@ def make_booking_req():
         rest_id = int(req.rest_id)
         endpoint = f"{BASE_URL}/search/{rest_id}"
         response = requests.get(endpoint)
+        auth_token = req.user_token
 
         data = response.json()
         # Get Booking Token and try making a reservation.
@@ -119,7 +120,7 @@ def make_booking_req():
             #Making a reservation
             url = f"{BASE_URL}/make_booking"
 
-            payload = {"booking_token": booking_token}
+            payload = {"booking_token": booking_token, "auth_token": auth_token}
             response = requests.post(url, data=payload)
             data = response.json()
             logger.info(data['status'])
