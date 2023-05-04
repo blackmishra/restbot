@@ -95,22 +95,17 @@ def update_is_booking_date_flag():
 def make_booking_req():
     booking_staus=False
     book_reqs = Reservation_request.objects.filter(is_booking_date_active=True)
-
+    
     for req in book_reqs:
-        req_values = list(req.values())
-        rest_id = int(req_values['rest_id'])
+        rest_id = int(req.rest_id)
         endpoint = f"{BASE_URL}/search/{rest_id}"
         response = requests.get(endpoint)
 
         data = response.json()
-        logger.info(data)
-
         # Get Booking Token and try making a reservation.
         for slot in data['data']['config_details']:
-
             # Get Booking Token
             url = f"{BASE_URL}/get_booking_token"
-
             payload = {
                 "config_token": slot['config_token'],
                 "booking_date": slot['date'],
@@ -156,20 +151,19 @@ def update_restaurants():
 @shared_task
 def update_auth_token():
     book_reqs = Reservation_request.objects.all()
-    book_reqs_values = list(Reservation_request.objects.all())
-
     endpoint = f"{BASE_URL}/refresh_auth_token"
     payload = {}
-    logger.info('Inside task function')
-    print('Inside task function')
 
     for req in book_reqs:
         payload['resy_email'] = req.resy_email
         payload['resy_pwd'] = req.resy_pwd
-        logger.info(payload)
+
         response = requests.post(endpoint, payload)
         data = response.json()
-        logger.info(response)
-        logger.info(data)
         req.user_token = data['token']
-        req.save()
+        if response.status==status.HTTP_200_OK:
+            logger.info("Token refreshed.")
+            req.save()
+        else:
+            logger.info("Failed to update Token.")
+
