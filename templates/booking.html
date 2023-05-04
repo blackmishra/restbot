@@ -72,8 +72,8 @@
 								<div class="wizard-navigation">
 									<ul>
 			                            <li><a href="#details" data-toggle="tab">Restaurant</a></li>
-			                            <li><a href="#captain" data-toggle="tab">Table Size</a></li>
-			                            <li><a href="#description" data-toggle="tab">Date and Time</a></li>
+			                            <li><a href="#captain" data-toggle="tab">Booking Specifics</a></li>
+			                            <li><a href="#description" data-toggle="tab">Resy Details</a></li>
 			                        </ul>
 								</div>
 
@@ -110,74 +110,54 @@
 										</div>
 		                            </div>
 		                            <div class="tab-pane" id="captain">
-		                                
-										
-										<div class="col-sm-6" rel="tooltip" title="Provide Table Size.">
-											<h4 class="info-text">Number of guests you are expecting? </h4>
-										</div>
-										<div class="col-sm-6" rel="tooltip" title="Provide Table Size.">
-											<input name="guests_size" type="text" class="form-control">	
-										</div>
+		                                <table>
+											<tr>
+												<td>
+													<h4 class="info-text">Number of guests you are expecting? </h4>
 
-		                                <div class="row">
+												</td>
+												
+												<td>
+													<input class="info-text" name="guests_size" type="text">	
+
+												</td>
+
+											</tr>
 											
-		                                    <div class="col-sm-10 col-sm-offset-1">
-	
-		                                        <div class="col-sm-4">
-		                                            <div class="choice" data-toggle="wizard-radio" rel="tooltip" title="Best for single or couple booking.">
-		                                                <input type="radio" name="numbr_guests" value="2">
-		                                                <div class="icon">
-		                                                    <i class="material-icons">people</i>
-		                                                </div>
-		                                                <h6>Couple (2 guests)</h6>
-														<input type="hidden" name="guests_size" value="2">
+											<tr>
+												<td>
+													<h4 class="info-text">Select date for reservation.</h4>
 
-		                                            </div>
-		                                        </div>
-
-		                                        <div class="col-sm-4">
-		                                            <div class="choice" data-toggle="wizard-radio" rel="tooltip" title="Best for family booking.">		                                                
-														<input type="radio" name="numbr_guests" value="4">
-		                                                <div class="icon">
-		                                                    <i class="material-icons">diversity_1</i>
-		                                                </div>
-		                                                <h6>Family (4 guests)</h6>
-														<input type="hidden" name="guests_size" value="4">
-		                                            </div>
-		                                        </div>
-												<div class="col-sm-4">
-		                                            <div class="choice" data-toggle="wizard-radio" rel="tooltip" title="Select this option if you are coming with your team.">
-														<input type="radio" name="numbr_guests" value="4">
-		                                                <div class="icon">
-		                                                    <i class="material-icons">tune</i>
-														</div>
-														<h6>Custom Value</h6>
-															
-
-		                                            </div>
-		                                        </div>
+												</td>
 												
-												
-												
+												<td>
+													<input class="info-text" type="date" id="date_picker123" name="date_picker">
 
+												</td>
 
-		                                    </div>
-		                                </div>
+											</tr>
+										</table>
+		                                
 		                            </div>
 									<div class="tab-pane" id="description">
+										
 		                            	<div class="row">
-			                            	<div class="col-sm-12">
-			                                	<h4 class="info-text">Select date for reservation.</h4>
-												<br>
-												<label class="info-text" for="date">Date:</label>
-												<input class="info-text" type="date" id="date_picker123" name="date_picker">
-			                            	</div>
+			                            	<div class="col-sm-6">
+												<div class="form-group" class="col-sm-4">
+													<h4>RESY Account Email</h4>
+													<input name="resy_email" type="text" class="form-control" placeholder="Your Email *" value="" />
+												</div>
+												<div class="form-group" class="col-sm-4">
+													<h4>RESY Account Password</h4>
+
+													<input name="resy_pwd" type="password" class="form-control" placeholder="Your Password *" value="" />
+												</div>
+
+			                                </div>
 
 		                            	</div>
-										<div class="col-sm-12">
-											
 
-										</div>
+										
 		                            </div>
 
 		                        </div>
