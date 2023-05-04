@@ -97,7 +97,7 @@ def make_booking_req():
     book_reqs = Reservation_request.objects.filter(is_booking_date_active=True)
 
     for req in book_reqs:
-        req_values = req.values()
+        req_values = list(req.values())
         rest_id = int(req_values['rest_id'])
         endpoint = f"{BASE_URL}/search/{rest_id}"
         response = requests.get(endpoint)
@@ -165,7 +165,7 @@ def update_auth_token():
     print('Inside task function')
 
     for req in book_reqs:
-        req_values = req.values()
+        req_values = list(req.values())
         payload['resy_email'] = req_values['resy_email']
         payload['resy_pwd'] = req_values['resy_pwd']
         logger.info(payload)
