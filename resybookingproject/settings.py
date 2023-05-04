@@ -8,8 +8,8 @@ BASE_URL = os.environ.get('BASE_URL', default='base_url')
 
 SECRET_KEY = os.environ.get('SECRET_KEY', default='your secret key')
 
-# DEBUG = True
-DEBUG = 'RENDER' not in os.environ
+DEBUG = True
+# DEBUG = 'RENDER' not in os.environ
 
 ALLOWED_HOSTS = []
 
