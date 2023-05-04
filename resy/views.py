@@ -3,7 +3,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import permissions
-from .models import Restaurant, Resy
+
+from resybookingproject.settings import BASE_URL
+from .models import Reservation_request, Restaurant, Resy
 from .serializers import BookingSerializer, RestaurantSerializer, ResySerializer
 from rest_framework.renderers import JSONRenderer
 from django.views.generic.base import TemplateView
@@ -12,6 +14,7 @@ import requests
 from django.shortcuts import render
 import datetime
 from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpRequest
 
 
 class SearchTemplateView(TemplateView):
@@ -181,8 +184,9 @@ class RestTemplateView(APIView):
     context={}
 
     def get(self, request, *args, **kwargs):
-        rest_id = self.kwargs.get('rest_id', None)
-        current_date = datetime.date.today()
+        
+        rest_id = request.data.get('rest_id') or None
+        current_date = request.data.get('booking_date') or datetime.date.today()
         print(current_date)
         print(rest_id)
 
@@ -247,7 +251,7 @@ class Request_booking(APIView):
 
     def get(self, request, *args, **kwargs):
 
-        rest_objs = list(Restaurant.objects.all().values())
+        rest_objs = list(Restaurant.objects.all().order_by('rest_name').values())
         # print(rest_objs)
         context = { 'data': rest_objs}
         # context = response.context_data
@@ -266,6 +270,9 @@ class Request_booking(APIView):
             'date': request.data.get('date_picker'), 
             'number_of_guests': request.data.get('num_guests') or request.data.get('guests_size'),
             'booking_available_till': datetime.date.today(),
+            'resy_email': request.data.get('resy_email'),
+            'resy_pwd': request.data.get('resy_pwd')
+
 
         }
 
@@ -411,10 +418,11 @@ class Make_Booking(APIView):
             'sec-fetch-site': 'same-site',
             'sec-gpc': '1',
             'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
-            'x-origin': 'https://widgets.resy.com',
-            'x-resy-auth-token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJleHAiOjE2ODE5OTA3MDEsInVpZCI6NDAwMzk5NjMsImd0IjoiY29uc3VtZXIiLCJncyI6W10sImV4dHJhIjp7Imd1ZXN0X2lkIjoxMzIxNDYwMTl9fQ.AFsRxEXMVczhJA5rg3dY5w_lG2I2RjywWST3hSeTV6iwataTtiOgU8DYS0BEtjLfbv2ZP00tC-gTL1J2ocu7KSU5ANIW3nzu3Axn7LWFdYVrmD4uCD_WndQFbxRZTTveXfrlifFZLAw-ckNFZOpsxdcY1Q69YEqSNbvxuZEyNYF5m94F',
-            'x-resy-universal-auth': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJleHAiOjE2ODE5OTA3MDEsInVpZCI6NDAwMzk5NjMsImd0IjoiY29uc3VtZXIiLCJncyI6W10sImV4dHJhIjp7Imd1ZXN0X2lkIjoxMzIxNDYwMTl9fQ.AFsRxEXMVczhJA5rg3dY5w_lG2I2RjywWST3hSeTV6iwataTtiOgU8DYS0BEtjLfbv2ZP00tC-gTL1J2ocu7KSU5ANIW3nzu3Axn7LWFdYVrmD4uCD_WndQFbxRZTTveXfrlifFZLAw-ckNFZOpsxdcY1Q69YEqSNbvxuZEyNYF5m94F'
-        }
+            'x-origin': 'https://widgets.resy.com'
+            }
+        # headers['x-resy-auth-token'] = 
+        # headers['x-resy-universal-auth'] = 
+
         print(payload)
         response = requests.request("POST", url, headers=headers, data=payload)
 
@@ -486,6 +494,7 @@ class Add_Restaurant(APIView):
             try:
                 Restaurant.objects.get(rest_id=obj_id)
                 message = 'Restaurant already exists in DB.'
+                req_status = status.HTTP_409_CONFLICT
             except Restaurant.DoesNotExist:
                 message = 'Congrats! New Restaurant found and inserted.'
                 data={}
@@ -495,9 +504,51 @@ class Add_Restaurant(APIView):
                 if serializer.is_valid():
                     serializer.save()
                     return render(request, context={'data': message}, status=status.HTTP_201_CREATED, template_name='add_rest.html')
-                return render(request, context={'data': serializer.errors}, status=status.HTTP_200_OK, template_name='add_rest.html')
+                return render(request, context={'data': serializer.errors}, status=status.HTTP_400_BAD_REQUEST, template_name='add_rest.html')
         else:
             message="Could not find restaurant. Please try again.."
+            req_status = status.HTTP_404_NOT_FOUND
+
         
-        return render(request, context={'data': message}, status=status.HTTP_200_OK, template_name='add_rest.html')
+        return render(request, context={'data': message}, status=req_status, template_name='add_rest.html')
                 
+
+
+class User_auth_token(APIView):
+    def post(self, request, *args, **kwargs):
+        url = "https://api.resy.com/3/auth/password"
+        user_email = request.data.get('resy_email')
+        user_pwd = request.data.get('resy_pwd')
+        payload=f"email={user_email}&password={user_pwd}"
+        headers = {
+            'authority': 'api.resy.com',
+            'accept': 'application/json, text/plain, */*',
+            'accept-language': 'en-GB,en;q=0.9',
+            'authorization': 'ResyAPI api_key="VbWk7s3L4KiK5fzlO7JD3Q5EYolJI7n5"',
+            'cache-control': 'no-cache',
+            'content-type': 'application/x-www-form-urlencoded',
+            'origin': 'https://resy.com',
+            'referer': 'https://resy.com/',
+            'sec-ch-ua': '"Brave";v="111", "Not(A:Brand";v="8", "Chromium";v="111"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Linux"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-site',
+            'sec-gpc': '1',
+            'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36',
+            'x-origin': 'https://resy.com'
+        }
+
+        response = requests.request("POST", url, headers=headers, data=payload)
+        print(response)
+        data = response.json()
+
+        user_token = data['token']
+        context = {}
+        context['details'] = data
+        context['token'] = user_token
+
+        return Response(context, status=status.HTTP_200_OK)
+
+
