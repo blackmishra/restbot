@@ -156,18 +156,16 @@ def update_restaurants():
 @shared_task
 def update_auth_token():
     book_reqs = Reservation_request.objects.all()
-
-    current_date = str(datetime.date.today())
+    book_reqs_values = list(Reservation_request.objects.all())
 
     endpoint = f"{BASE_URL}/refresh_auth_token"
     payload = {}
     logger.info('Inside task function')
     print('Inside task function')
 
-    for req in book_reqs:
-        req_values = list(req.values())
-        payload['resy_email'] = req_values['resy_email']
-        payload['resy_pwd'] = req_values['resy_pwd']
+    for index, req in enumerate(book_reqs):
+        payload['resy_email'] = book_reqs_values[index]['resy_email']
+        payload['resy_pwd'] = book_reqs_values[index]['resy_pwd']
         logger.info(payload)
         response = requests.post(endpoint, payload)
         data = response.json()
