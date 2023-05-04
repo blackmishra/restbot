@@ -165,13 +165,12 @@ def update_auth_token():
     print('Inside task function')
 
     for req in book_reqs:
-        payload['resy_email'] = req['resy_email']
-        payload['resy_pwd'] = req['resy_pwd']
+        req_values = req.values()
+        payload['resy_email'] = req_values['resy_email']
+        payload['resy_pwd'] = req_values['resy_pwd']
         logger.info(payload)
-        print(payload)
         response = requests.post(endpoint, payload)
         data = response.json()
-        print(response)
         logger.info(response)
         logger.info(data)
         req.user_token = data['token']
