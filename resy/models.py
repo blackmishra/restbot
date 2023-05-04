@@ -32,14 +32,9 @@ class Reservation_request(models.Model):
     number_of_guests = models.IntegerField(null=False, blank=False)
     booking_available_till = models.DateField(null=False, blank=False)
     is_booking_date_active = models.BooleanField(default=False)
-    user_token = models.TextField(default='abc')
-    resy_email = models.CharField(max_length = 180, null=False, default='abc')
-    resy_pwd = models.CharField(max_length = 180, null=False, default='abc')
-    booking_status = models.CharField(max_length = 100, null=False, default='Pending')
 
     def __str__(self):
-        booking_desc = f"Booking of {self.number_of_guests} at {self.rest_name} on {self.date}"
-        return booking_desc
+        return self.rest_name
     
     def get_date_diff(self, date):
         # today = date.today()

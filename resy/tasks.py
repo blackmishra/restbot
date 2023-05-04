@@ -6,11 +6,10 @@ from resy.models import Reservation_request, Restaurant
 from celery.utils.log import get_task_logger
 from rest_framework import status
 from resy.views import SearchTemplateView
-from resybookingproject.settings import BASE_URL
 
 
 logger = get_task_logger(__name__)
-
+base_url='http://127.0.0.1:8000/restbot'
 
   
 @shared_task
@@ -87,21 +86,19 @@ def update_is_booking_date_flag():
             req.is_booking_date_active = False
             req.save()
 
-        # if req.remove_booking_req:
-        #     req.delete()
+        if req.remove_booking_req:
+            req.delete()
 
 
 @shared_task
 def make_booking_req():
-    booking_staus=False
-    book_reqs = Reservation_request.objects.filter(is_booking_date_active=True)
+    book_reqs = Reservation_request.objects.filter(is_booking_date_active=True).values()
+    base_url='http://127.0.0.1:8000/restbot'
 
     for req in book_reqs:
-        req_values = req.values()
-        rest_id = int(req_values['rest_id'])
-        endpoint = f"{BASE_URL}/search/{rest_id}"
+        rest_id = int(req['rest_id'])
+        endpoint = f"{base_url}/search/{rest_id}"
         response = requests.get(endpoint)
-
         data = response.json()
         logger.info(data)
 
@@ -109,7 +106,7 @@ def make_booking_req():
         for slot in data['data']['config_details']:
 
             # Get Booking Token
-            url = f"{BASE_URL}/get_booking_token"
+            url = f"{base_url}/get_booking_token"
 
             payload = {
                 "config_token": slot['config_token'],
@@ -122,20 +119,15 @@ def make_booking_req():
             logger.info(data)
             booking_token = data.get('data')
             #Making a reservation
-            url = f"{BASE_URL}/make_booking"
+            url = f"{base_url}/make_booking"
 
             payload = {"booking_token": booking_token}
             response = requests.post(url, data=payload)
             data = response.json()
             logger.info(data['status'])
             logger.info(data)
-            if response.status_code==201:
-                booking_staus = True
-                break
-        else:
-            if booking_staus:
-                req.booking_status = 'Confirmed'
-                req.save()
+            break
+        break
 
 
 @shared_task
@@ -143,7 +135,7 @@ def update_restaurants():
     Restaurant.objects.all().delete()
     current_date = str(datetime.date.today())
 
-    endpoint = f"{BASE_URL}/fetch_and_add_rest"
+    endpoint = f"{base_url}/fetch_and_add_rest"
 
     response = requests.post(endpoint)
     data = response.json()
@@ -152,27 +144,6 @@ def update_restaurants():
     else:
         logger.info("Restaurants List could not be updated. Please try again.")
 
+            
 
-@shared_task
-def update_auth_token():
-    book_reqs = Reservation_request.objects.all()
 
-    current_date = str(datetime.date.today())
-
-    endpoint = f"{BASE_URL}/refresh_auth_token"
-    payload = {}
-    logger.info('Inside task function')
-    print('Inside task function')
-
-    for req in book_reqs:
-        payload['resy_email'] = req['resy_email']
-        payload['resy_pwd'] = req['resy_pwd']
-        logger.info(payload)
-        print(payload)
-        response = requests.post(endpoint, payload)
-        data = response.json()
-        print(response)
-        logger.info(response)
-        logger.info(data)
-        req.user_token = data['token']
-        req.save()
