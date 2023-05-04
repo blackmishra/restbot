@@ -163,9 +163,9 @@ def update_auth_token():
     logger.info('Inside task function')
     print('Inside task function')
 
-    for index, req in enumerate(book_reqs):
-        payload['resy_email'] = book_reqs_values[index]['resy_email']
-        payload['resy_pwd'] = book_reqs_values[index]['resy_pwd']
+    for req in book_reqs:
+        payload['resy_email'] = req.resy_email
+        payload['resy_pwd'] = req.resy_pwd
         logger.info(payload)
         response = requests.post(endpoint, payload)
         data = response.json()
