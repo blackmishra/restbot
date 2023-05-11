@@ -316,7 +316,7 @@ class Make_Booking(APIView):
 
         response = requests.request("POST", url, headers=headers, data=payload)
         data = response.json()
-        if response.status==status.HTTP_201_CREATED:
+        if response.status_code==201:
             return Response(data, status=status.HTTP_201_CREATED)
         else:
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
