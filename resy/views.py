@@ -313,13 +313,17 @@ class Make_Booking(APIView):
             }
         headers['x-resy-auth-token'] = auth_token
         headers['x-resy-universal-auth'] = auth_token
+        try:
+            response = requests.request("POST", url, headers=headers, data=payload)
+            print(response)
+            print(response.status_code)
+            data = response.json()
+        except Exception as e:
+            return Response("Booking Request Failed to create. "+str(e), status=status.HTTP_400_BAD_REQUEST)
 
-        response = requests.request("POST", url, headers=headers, data=payload)
-        data = response.json()
         if response.status_code==201:
             return Response(data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
 
 class Add_Restaurant(APIView):
     def get(self, request, *args, **kwargs):
