@@ -117,6 +117,7 @@ def make_booking_req():
             data = response.json()
             logger.info(data)
             booking_token = data.get('data')
+            logger.info(booking_token)
             #Making a reservation
             url = f"{BASE_URL}/make_booking"
 
@@ -126,10 +127,14 @@ def make_booking_req():
             logger.info(data['status'])
             logger.info(data)
             if response.status_code==201:
-                # booking_staus = True
+                booking_staus = True
                 req.booking_status = 'Confirmed'
                 req.save()
                 break
+        else: 
+            if booking_staus is False:
+                logger.info('All the slots are occupied for the date.')
+
 
 
 
