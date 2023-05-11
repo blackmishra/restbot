@@ -120,7 +120,6 @@ def make_booking_req():
 
             response = requests.post(url, data=payload)
             data = response.json()
-            logger.info(data)
             booking_token = data.get('data')
             logger.info(booking_token)
             #Making a reservation
@@ -128,6 +127,8 @@ def make_booking_req():
 
             payload = {"booking_token": booking_token, "auth_token": auth_token}
             response = requests.post(url, data=payload)
+            logger.info(response)
+            logger.info(response.status_code)
             data = response.json()
             logger.info(data['status'])
             logger.info(data)
@@ -139,8 +140,6 @@ def make_booking_req():
         else: 
             if booking_staus is False:
                 logger.info('All the slots are occupied for the date.')
-
-
 
 
 @shared_task

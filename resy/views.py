@@ -315,8 +315,8 @@ class Make_Booking(APIView):
         headers['x-resy-universal-auth'] = auth_token
 
         response = requests.request("POST", url, headers=headers, data=payload)
+        data = response.json()
         if response.status==status.HTTP_201_CREATED:
-            data = response.json()
             return Response(data, status=status.HTTP_201_CREATED)
         else:
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
