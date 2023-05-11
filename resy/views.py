@@ -184,11 +184,11 @@ class Request_booking(APIView):
             context['result'] = serializer.data
             context['message'] = 'Booking Request: Successfully created.'
 
-            return render(request, context=context, status=status.HTTP_201_CREATED, template_name='booking.html')
+            return render(request, context=context, status=status.HTTP_201_CREATED, template_name='status.html')
         context['result'] = serializer.errors
         context['message'] = 'Booking Request: Failed to create.'
         print(context)
-        return render(request, context={'result': serializer.errors}, status=status.HTTP_400_BAD_REQUEST, template_name='booking.html')
+        return render(request, context=context, status=status.HTTP_400_BAD_REQUEST, template_name='status.html')
 
 class Populate_Restaurants(APIView):
     def get(self, request, *args, **kwargs):
@@ -392,14 +392,14 @@ class Add_Restaurant(APIView):
                 serializer = RestaurantSerializer(data=data)
                 if serializer.is_valid():
                     serializer.save()
-                    return render(request, context={'data': message}, status=status.HTTP_201_CREATED, template_name='add_rest.html')
-                return render(request, context={'data': serializer.errors}, status=status.HTTP_400_BAD_REQUEST, template_name='add_rest.html')
+                    return render(request, context={'message': message}, status=status.HTTP_201_CREATED, template_name='status.html')
+                return render(request, context={'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST, template_name='status.html')
         else:
             message="Could not find restaurant. Please try again.."
             req_status = status.HTTP_404_NOT_FOUND
 
         
-        return render(request, context={'data': message}, status=req_status, template_name='add_rest.html')
+        return render(request, context={'message': message}, status=req_status, template_name='status.html')
                 
 
 
