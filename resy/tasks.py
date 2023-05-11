@@ -98,8 +98,13 @@ def make_booking_req():
     
     for req in book_reqs:
         rest_id = int(req.rest_id)
-        endpoint = f"{BASE_URL}/search/{rest_id}"
-        response = requests.get(endpoint)
+        endpoint = f"{BASE_URL}/find"
+
+        payload ={
+                "booking_date": req.date,
+                "rest_id": rest_id
+        }
+        response = requests.get(endpoint, data=payload)
         auth_token = req.user_token
 
         data = response.json()
