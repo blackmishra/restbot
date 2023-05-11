@@ -126,12 +126,11 @@ def make_booking_req():
             logger.info(data['status'])
             logger.info(data)
             if response.status_code==201:
-                booking_staus = True
-                break
-        else:
-            if booking_staus:
+                # booking_staus = True
                 req.booking_status = 'Confirmed'
                 req.save()
+                break
+
 
 
 @shared_task
@@ -143,7 +142,7 @@ def update_restaurants():
 
     response = requests.post(endpoint)
     data = response.json()
-    if response.status==status.HTTP_201_CREATED:
+    if response.status_code==201:
         logger.info("Restaurants List updated.")
     else:
         logger.info("Restaurants List could not be updated. Please try again.")
@@ -162,7 +161,7 @@ def update_auth_token():
         response = requests.post(endpoint, payload)
         data = response.json()
         req.user_token = data['token']
-        if response.status==status.HTTP_200_OK:
+        if response.status_code==200:
             logger.info("Token refreshed.")
             req.save()
         else:
