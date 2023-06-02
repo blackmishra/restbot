@@ -314,11 +314,14 @@ class Make_Booking(APIView):
             print(response)
             print(response.status_code)
             data = response.json()
+            print(data)
         except Exception as e:
             return Response("Booking Request Failed to create. "+str(e), status=status.HTTP_400_BAD_REQUEST)
 
         if response.status_code==201:
             return Response(data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(data, status=response.status_code)
 
 
 class Add_Restaurant(APIView):
@@ -441,12 +444,19 @@ class User_auth_token(APIView):
 
 
 class Cancel_Booking(APIView):
+    def get(self, request, *args, **kwargs):
+        self.context={'data':None}
+        return render(request, 'cancel_booking.html', self.context)
+    
     def post(self, request, *args, **kwargs):
         resy_url = "https://api.resy.com/3/cancel"
-        user_email = request.data.get('resy_email')
-        user_pwd = request.data.get('resy_pwd')
-        auth_token = request.data.get('auth_token')
-        payload=f"email={user_email}&password={user_pwd}"
+        booking_id = request.data.get('booking_id')
+        print(booking_id)
+        req = Reservation_request.objects.get(booking_id=booking_id)
+        auth_token = req.user_token
+        reservation_cnf_token = req.reservation_cnf_token
+
+        payload=f"resy_token={reservation_cnf_token}"
         headers = {
             'authority': 'api.resy.com',
             'accept': 'application/json, text/plain, */*',
@@ -470,14 +480,12 @@ class Cancel_Booking(APIView):
         headers['x-resy-universal-auth'] = auth_token
 
         response = requests.request("POST", resy_url, headers=headers, data=payload)
-        print(response)
-        data = response.json()
+        if response.status_code==200:
+            message = "Booking Cancelled Successfully."
+        else:
+            message = "Could not cancel the booking. Please try again."
 
-        user_token = data['token']
-        context = {}
-        context['details'] = data
-        context['token'] = user_token
-
-        return Response(context, status=status.HTTP_200_OK)
+        return render(request, context={'message': message}, status=response.status_code, template_name='status.html')
+    
 
 

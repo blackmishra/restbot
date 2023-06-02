@@ -8,6 +8,7 @@ from .views import (
     Make_Booking,
     Add_Restaurant,
     User_auth_token,
+    Cancel_Booking,
 )
 
 urlpatterns = [
@@ -19,6 +20,7 @@ urlpatterns = [
     path('make_booking', Make_Booking.as_view()),
     path('add_rest', Add_Restaurant.as_view(), name='add_rest'),
     path('refresh_auth_token', User_auth_token.as_view(), name='refresh_auth_token'),
+    path('cancel_booking', Cancel_Booking.as_view(), name = "cancel_booking"),
 
 
 ]
