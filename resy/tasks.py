@@ -93,7 +93,7 @@ def update_is_booking_date_flag():
 
 @shared_task
 def make_booking_req():
-    booking_staus=False
+    booking_status=False
     book_reqs = Reservation_request.objects.filter(is_booking_date_active=True)
     
     for req in book_reqs:
@@ -130,15 +130,16 @@ def make_booking_req():
             logger.info(response)
             logger.info(response.status_code)
             data = response.json()
-            logger.info(data['status'])
             logger.info(data)
             if response.status_code==201:
-                booking_staus = True
+                booking_status = True
                 req.booking_status = 'Confirmed'
+                req.reservation_id = data['reservation_id']
+                req.reservation_cnf_token = data['resy_token']
                 req.save()
                 break
         else: 
-            if booking_staus is False:
+            if booking_status is False:
                 logger.info('All the slots are occupied for the date.')
 
 

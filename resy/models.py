@@ -37,6 +37,9 @@ class Reservation_request(models.Model):
     resy_email = models.CharField(max_length = 180, null=False, default='abc')
     resy_pwd = models.CharField(max_length = 180, null=False, default='abc')
     booking_status = models.CharField(max_length = 100, null=False, default='Pending')
+    reservation_id = models.TextField(default='abc')
+    reservation_cnf_token = models.TextField(default='abc')
+
 
     def __str__(self):
         booking_desc = f"Booking of {self.number_of_guests} at {self.rest_name} on {self.date}"
