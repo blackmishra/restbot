@@ -144,12 +144,12 @@ def make_booking_req():
 
 @shared_task
 def update_restaurants():
-    # Restaurant.objects.all().delete()
+    Restaurant.objects.all().delete()
     current_date = str(datetime.date.today())
 
     endpoint = f"{BASE_URL}/fetch_and_add_rest"
 
-    response = requests.post(endpoint)
+    response = requests.get(endpoint)
     data = response.json()
     if response.status_code==201:
         logger.info("Restaurants List updated.")
