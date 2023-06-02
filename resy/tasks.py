@@ -144,7 +144,7 @@ def make_booking_req():
 
 @shared_task
 def update_restaurants():
-    Restaurant.objects.all().delete()
+    # Restaurant.objects.all().delete()
     current_date = str(datetime.date.today())
 
     endpoint = f"{BASE_URL}/fetch_and_add_rest"

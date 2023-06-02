@@ -18,11 +18,6 @@ from django.http import HttpRequest
 
 
 class SearchTemplateView(TemplateView):
-    # add permission to check if user is authenticated
-    # permission_classes = [permissions.IsAuthenticated]
-    # renderer_classes = [JSONRenderer]
-
-   # 1. List all
     template_name = 'index.html'
     context={}
 
@@ -69,8 +64,6 @@ class SearchTemplateView(TemplateView):
             # 'x-resy-universal-auth': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJleHAiOjE2Nzg0OTUwNzQsInVpZCI6Mzg4MDE2OTIsImd0IjoiY29uc3VtZXIiLCJncyI6W10sImV4dHJhIjp7Imd1ZXN0X2lkIjoxMjkyNjQ1MDZ9fQ.APZepm-Z5Yl8ECqA315ub0p11SJcvItCrrIZch1mNMrW3tEONvU9h2bLeodTaADeY6ojUzalNP9iQ40CKqhLWxUXAd-OUBqtsfwvSn2zukd14d9WZb1WuPZCPv_8D8jG--hMw3vVjJwvtLDwr0pAefqf_IIl7bzXc74tujLKN24DQRtC'
         }
         response = requests.post(url, headers=headers, data = payload)
-        print(response.status_code)
-        # data = json.loads(response.json)
         data = response.json()
 
         # All values
@@ -89,7 +82,6 @@ class SearchTemplateView(TemplateView):
             temp['description'] = item['content'][0]['body']
             values.append(temp)
 
-        # context = super(ResyTemplateView. self).get_context_data(*args, **kwargs)
         values = sorted(values, key=lambda d: d['name']) 
         self.context['data'] = values
         return self.context
@@ -152,7 +144,7 @@ class RestTemplateView(APIView):
         rest_details['status'] = status
         self.context['data'] = rest_details
         return Response(self.context)
-    
+
 
 class Request_booking(APIView):
 
