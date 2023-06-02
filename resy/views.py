@@ -13,6 +13,7 @@ import json
 import requests
 from django.shortcuts import render
 import datetime
+import uuid
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpRequest
 
@@ -158,6 +159,8 @@ class Request_booking(APIView):
         Create the reservation request with given data
         '''
         rest_name, rest_id = request.data.get('rest_name').split(',')
+        
+
         data = {
             'rest_name': rest_name, 
             'rest_id': rest_id, 
@@ -165,7 +168,8 @@ class Request_booking(APIView):
             'number_of_guests': request.data.get('num_guests') or request.data.get('guests_size'),
             'booking_available_till': datetime.date.today(),
             'resy_email': request.data.get('resy_email'),
-            'resy_pwd': request.data.get('resy_pwd')
+            'resy_pwd': request.data.get('resy_pwd'),
+            'booking_id': str(uuid.uuid1()),
         }
 
         serializer = BookingSerializer(data=data)
@@ -398,7 +402,6 @@ class Add_Restaurant(APIView):
         return render(request, context={'message': message}, status=req_status, template_name='status.html')
                 
 
-
 class User_auth_token(APIView):
     def post(self, request, *args, **kwargs):
         url = "https://api.resy.com/3/auth/password"
@@ -426,6 +429,47 @@ class User_auth_token(APIView):
         }
 
         response = requests.request("POST", url, headers=headers, data=payload)
+        print(response)
+        data = response.json()
+
+        user_token = data['token']
+        context = {}
+        context['details'] = data
+        context['token'] = user_token
+
+        return Response(context, status=status.HTTP_200_OK)
+
+
+class Cancel_Booking(APIView):
+    def post(self, request, *args, **kwargs):
+        resy_url = "https://api.resy.com/3/cancel"
+        user_email = request.data.get('resy_email')
+        user_pwd = request.data.get('resy_pwd')
+        auth_token = request.data.get('auth_token')
+        payload=f"email={user_email}&password={user_pwd}"
+        headers = {
+            'authority': 'api.resy.com',
+            'accept': 'application/json, text/plain, */*',
+            'accept-language': 'en-GB,en;q=0.9',
+            'authorization': 'ResyAPI api_key="VbWk7s3L4KiK5fzlO7JD3Q5EYolJI7n5"',
+            'cache-control': 'no-cache',
+            'content-type': 'application/x-www-form-urlencoded',
+            'origin': 'https://resy.com',
+            'referer': 'https://resy.com/',
+            'sec-ch-ua': '"Brave";v="111", "Not(A:Brand";v="8", "Chromium";v="111"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Linux"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-site',
+            'sec-gpc': '1',
+            'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36',
+            'x-origin': 'https://resy.com'
+        }
+        headers['x-resy-auth-token'] = auth_token
+        headers['x-resy-universal-auth'] = auth_token
+
+        response = requests.request("POST", resy_url, headers=headers, data=payload)
         print(response)
         data = response.json()
 

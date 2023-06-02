@@ -26,6 +26,7 @@ class Restaurant(models.Model):
 
 
 class Reservation_request(models.Model):
+    booking_id = models.TextField(default='abc')
     rest_name = models.CharField(max_length = 180, null=False)
     rest_id = models.IntegerField(null=False, blank=False)
     date = models.DateField(null=False, blank=False)
