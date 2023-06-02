@@ -16,8 +16,15 @@ import datetime
 import uuid
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpRequest
+import yagmail
 
 
+
+def send_email(subject, message, to_email = 'mishra.shashank9598@gmail.com'):
+    from_email = 'rockdtaz@gmail.com'
+    user = yagmail.SMTP(user=from_email, password='scxywbidvtgmkwqp')
+    user.send(to=to_email, subject=subject, contents=message)
+    
 class SearchTemplateView(TemplateView):
     template_name = 'index.html'
     context={}
@@ -159,17 +166,17 @@ class Request_booking(APIView):
         Create the reservation request with given data
         '''
         rest_name, rest_id = request.data.get('rest_name').split(',')
-        
-
+        booking_id = str(uuid.uuid1())
+        resy_email = request.data.get('resy_email')
         data = {
             'rest_name': rest_name, 
             'rest_id': rest_id, 
             'date': request.data.get('date_picker'), 
             'number_of_guests': request.data.get('num_guests') or request.data.get('guests_size'),
             'booking_available_till': datetime.date.today(),
-            'resy_email': request.data.get('resy_email'),
+            'resy_email': resy_email,
             'resy_pwd': request.data.get('resy_pwd'),
-            'booking_id': str(uuid.uuid1()),
+            'booking_id': booking_id,
         }
 
         serializer = BookingSerializer(data=data)
@@ -177,13 +184,19 @@ class Request_booking(APIView):
 
         if serializer.is_valid():
             serializer.save()
-            context['result'] = serializer.data
-            context['message'] = 'Booking Request: Successfully created.'
 
+            subject = 'Booking Request: Successfully created.'
+            message = f"{subject} \n\n Your Booking ID : {booking_id}. \n\n\nYou may receive another notification when your reservation is confirmed. This mail is just to inform you that we have received your booking request. It does not guarentee you will get the reservation."
+
+            context['result'] = serializer.data
+            context['message'] = message
+
+            send_email(subject, context['message'], resy_email)
             return render(request, context=context, status=status.HTTP_201_CREATED, template_name='status.html')
         context['result'] = serializer.errors
-        context['message'] = 'Booking Request: Failed to create.'
+        context['message'] = 'BAD INPUT. Booking Request: Failed to create. Please try again with valid input.'
         print(context)
+
         return render(request, context=context, status=status.HTTP_400_BAD_REQUEST, template_name='status.html')
 
 class Populate_Restaurants(APIView):
@@ -481,7 +494,11 @@ class Cancel_Booking(APIView):
 
         response = requests.request("POST", resy_url, headers=headers, data=payload)
         if response.status_code==200:
-            message = "Booking Cancelled Successfully."
+            subject = "Booking Cancelled Successfully."
+            message = f"Your Reservation with Booking-ID: {booking_id}, cancelled successfully."
+            req.booking_status="Cancelled"
+            req.save()
+            send_email(subject, message, req.resy_email)
         else:
             message = "Could not cancel the booking. Please try again."
 
