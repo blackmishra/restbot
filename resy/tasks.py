@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 import json
 from celery import shared_task
 import requests
@@ -16,7 +16,7 @@ logger = get_task_logger(__name__)
 @shared_task
 def update_is_booking_date_flag():
     book_reqs = Reservation_request.objects.all()
-    current_date = str(datetime.date.today())
+    current_date = str(date.today())
 
     url='https://api.resy.com/3/venuesearch/search'
     payload = json.dumps({
@@ -149,7 +149,7 @@ def make_booking_req():
 @shared_task
 def update_restaurants():
     Restaurant.objects.all().delete()
-    current_date = str(datetime.date.today())
+    current_date = str(date.today())
 
     endpoint = f"{BASE_URL}/fetch_and_add_rest"
 
