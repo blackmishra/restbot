@@ -28,6 +28,8 @@ class BookingSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Please provide valid Table size.")
         if data['date'] < date.today():
             raise serializers.ValidationError("Date provided must be current or future.")
+        if data['to_time'] < data['from_time']:
+            raise serializers.ValidationError("Invalid Time range provided.")
         return data
 
         

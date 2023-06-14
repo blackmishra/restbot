@@ -176,6 +176,8 @@ class Request_booking(APIView):
             'booking_available_till': datetime.date.today(),
             'resy_email': resy_email,
             'resy_pwd': request.data.get('resy_pwd'),
+            'from_time': request.data.get('from_time'),
+            'to_time': request.data.get('to_time'),
             'booking_id': booking_id,
         }
 

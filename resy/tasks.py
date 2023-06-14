@@ -109,35 +109,37 @@ def make_booking_req():
 
         data = response.json()
         # Get Booking Token and try making a reservation.
+        
         for slot in data['data']['config_details']:
             # Get Booking Token
-            url = f"{BASE_URL}/get_booking_token"
-            payload = {
-                "config_token": slot['config_token'],
-                "booking_date": slot['date'],
-                "party_size": slot['party_size']
-            }
+            if slot['time']>=req.from_time and slot['time']<=req.to_time:
+                url = f"{BASE_URL}/get_booking_token"
+                payload = {
+                    "config_token": slot['config_token'],
+                    "booking_date": slot['date'],
+                    "party_size": slot['party_size']
+                }
 
-            response = requests.post(url, data=payload)
-            data = response.json()
-            booking_token = data.get('data')
-            logger.info(booking_token)
-            #Making a reservation
-            url = f"{BASE_URL}/make_booking"
+                response = requests.post(url, data=payload)
+                data = response.json()
+                booking_token = data.get('data')
+                logger.info(booking_token)
+                #Making a reservation
+                url = f"{BASE_URL}/make_booking"
 
-            payload = {"booking_token": booking_token, "auth_token": auth_token}
-            response = requests.post(url, data=payload)
-            logger.info(response)
-            logger.info(response.status_code)
-            data = response.json()
-            logger.info(data)
-            if response.status_code==201:
-                booking_status = True
-                req.booking_status = 'Confirmed'
-                req.reservation_id = data['reservation_id']
-                req.reservation_cnf_token = data['resy_token']
-                req.save()
-                break
+                payload = {"booking_token": booking_token, "auth_token": auth_token}
+                response = requests.post(url, data=payload)
+                logger.info(response)
+                logger.info(response.status_code)
+                data = response.json()
+                logger.info(data)
+                if response.status_code==201:
+                    booking_status = True
+                    req.booking_status = 'Confirmed'
+                    req.reservation_id = data['reservation_id']
+                    req.reservation_cnf_token = data['resy_token']
+                    req.save()
+                    break
         else: 
             if booking_status is False:
                 logger.info('All the slots are occupied for the date.')

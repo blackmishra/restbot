@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
-from datetime import date
+from datetime import time
 
 
 class Resy(models.Model):
@@ -39,7 +39,8 @@ class Reservation_request(models.Model):
     booking_status = models.CharField(max_length = 100, null=False, default='Pending')
     reservation_id = models.TextField(default='abc')
     reservation_cnf_token = models.TextField(default='abc')
-
+    from_time = models.TimeField(default=time(8, 0))
+    to_time = models.TimeField(default=time(8, 0))
 
     def __str__(self):
         booking_desc = f"Booking of {self.number_of_guests} at {self.rest_name} on {self.date}"
