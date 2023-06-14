@@ -13,6 +13,7 @@ import json
 import requests
 from django.shortcuts import render
 from datetime import date, datetime
+import datetime
 import uuid
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpRequest
@@ -101,7 +102,7 @@ class RestTemplateView(APIView):
     def get(self, request, *args, **kwargs):
         
         rest_id = request.data.get('rest_id') or None
-        current_date = request.data.get('booking_date') or date.today()
+        current_date = request.data.get('booking_date') or datetime.date.today()
         #Search specific restaurant details
         url = f"https://api.resy.com/4/find?lat=0&long=0&day={current_date}&party_size=2&venue_id={rest_id}"
         payload={}
@@ -204,7 +205,7 @@ class Request_booking(APIView):
 class Populate_Restaurants(APIView):
     def get(self, request, *args, **kwargs):
 
-        current_date = str(date.today())
+        current_date = str(datetime.date.today())
         # print(str(current_date))
         # print(current_date.strftime('%Y-%m-%d'))
         url='https://api.resy.com/3/venuesearch/search'
@@ -348,7 +349,7 @@ class Add_Restaurant(APIView):
     def post(self, request, *args, **kwargs):
         rest_name = request.data.get('rest_name')
         print(rest_name)
-        current_date = str(date.today())
+        current_date = str(datetime.date.today())
 
         url = "https://api.resy.com/3/venuesearch/search"
 
