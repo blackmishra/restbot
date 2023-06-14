@@ -112,7 +112,8 @@ def make_booking_req():
         
         for slot in data['data']['config_details']:
             # Get Booking Token
-            if slot['time']>=req.from_time and slot['time']<=req.to_time:
+            slot_time = datetime.strptime(slot['time'], '%H:%M:%S').time()
+            if slot_time>=req.from_time and slot_time<=req.to_time:
                 url = f"{BASE_URL}/get_booking_token"
                 payload = {
                     "config_token": slot['config_token'],
