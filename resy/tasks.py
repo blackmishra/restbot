@@ -95,7 +95,7 @@ def update_is_booking_date_flag():
 @shared_task
 def make_booking_req():
     booking_status=False
-    book_reqs = Reservation_request.objects.filter(is_booking_date_active=True)
+    book_reqs = Reservation_request.objects.filter(booking_status='Pending', is_booking_date_active=True)
     
     for req in book_reqs:
         rest_id = int(req.rest_id)
