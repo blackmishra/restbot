@@ -8,11 +8,11 @@ pip install --upgrade pip
 pip install celery
 pip install djangorestframework
 pip install django-celery-beat
-pip install redis
+# pip install redis
 pip install yagmail
-
+pip install python-dotenv
 pip install poetry==1.2.0
-
+pip install authlib
 rm poetry.lock
 
 poetry lock

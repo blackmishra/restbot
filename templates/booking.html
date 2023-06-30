@@ -1,18 +1,20 @@
 <!doctype html>
 <html lang="en">
+
 <head>
 	<meta charset="utf-8" />
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 	<title>Request Reservation</title>
 
 	<meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
-    <meta name="viewport" content="width=device-width" />
+	<meta name="viewport" content="width=device-width" />
 
 	<link rel="apple-touch-icon" sizes="76x76" href="assets/img/apple-icon.png" />
 	<link rel="icon" type="image/png" href="assets/img/favicon.png" />
 
 	<!--     Fonts and icons     -->
-	<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
+	<link rel="stylesheet" type="text/css"
+		href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" />
 	<!-- CSS Files -->
 	{% load static %}
@@ -25,17 +27,17 @@
 	<link href="{% static 'assets/vendor/aos/aos.css' %}" rel="stylesheet">
 	<link href="{% static 'assets/vendor/glightbox/css/glightbox.min.css' %}" rel="stylesheet">
 	<link href="{% static 'assets/vendor/swiper/swiper-bundle.min.css' %}" rel="stylesheet">
-  
-  
+
+
 	<link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
-    <script type="text/javascript">
-		window.onload=function(){
-		var today = new Date().toISOString().split('T')[0];
-		document.getElementsByName("date_picker")[0].setAttribute('min', today);
-	}
-	</script> 
+	<script type="text/javascript">
+		window.onload = function () {
+			var today = new Date().toISOString().split('T')[0];
+			document.getElementsByName("date_picker")[0].setAttribute('min', today);
+		}
+	</script>
 	<style>
-		.date_picker{
+		.date_picker {
 			padding: 10px;
 			background: #000;
 			color: #fff;
@@ -45,99 +47,104 @@
 			justify-content: center;
 
 		}
-		
 	</style>
-	
+
 </head>
 
 <body>
 	<div class="image-container set-full-height" style="background-image: url('assets/img/wizard-book.jpg')">
 		<!--   Big container   -->
-	    <div class="container">
-	        <div class="row">
-		        <div class="col-sm-8 col-sm-offset-2">
-		            <!--      Wizard container        -->
-		            <div class="wizard-container">
-		                <div class="card wizard-card" data-color="red" id="wizard">
-		                    <form action="" method="post">
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-8 col-sm-offset-2">
+					<!--      Wizard container        -->
+					<div class="wizard-container">
+						<div class="card wizard-card" data-color="red" id="wizard">
+							<form action="" method="post">
 								{% csrf_token %}
-		                <!--        You can switch " data-color="blue" "  with one of the next bright colors: "green", "orange", "red", "purple"             -->
+								<!--        You can switch " data-color="blue" "  with one of the next bright colors: "green", "orange", "red", "purple"             -->
 
-		                    	<div class="wizard-header">
-		                        	<h3 class="wizard-title">
-		                        		Make a Reservation!
-		                        	</h3>
+								<div class="wizard-header">
+									<h3 class="wizard-title">
+										Make a Reservation!
+									</h3>
 									<h5>Please provide us some details to get you the booking.</h5>
-		                    	</div>
+								</div>
 								<div class="wizard-navigation">
 									<ul>
-			                            <li><a href="#details" data-toggle="tab">Restaurant</a></li>
-			                            <li><a href="#captain" data-toggle="tab">Booking Specifics</a></li>
-			                            <li><a href="#description" data-toggle="tab">Resy Details</a></li>
-			                        </ul>
+										<li><a href="#details" data-toggle="tab">Restaurant</a></li>
+										<li><a href="#captain" data-toggle="tab">Booking Specifics</a></li>
+										<li><a href="#description" data-toggle="tab">Resy Details</a></li>
+										<li><a href="#confirm_booking" data-toggle="tab">Booking Details</a></li>
+
+									</ul>
 								</div>
 
-		                        <div class="tab-content">
-		                            <div class="tab-pane" id="details">
-		                            	<div class="row">
-			                            	<div class="col-sm-12">
-			                                	<h4 class="info-text"> Let's find your Restaurant.</h4>
-			                            	</div>
-											
-		                                	<div class="col-sm-6">
+								<div class="tab-content">
+									<div class="tab-pane" id="details">
+										<div class="row">
+											<div class="col-sm-12">
+												<h4 class="info-text"> Let's find your Restaurant.</h4>
+											</div>
+
+											<div class="col-sm-6">
 												<h3>Select your Restaurant!</h3>
 												<div class="form-group label-floating">
-		                                        	<label class="control-label">Restaurant</label>
-													
-													<!-- <h4>{{ item.name.0 }} </h4> -->
-													
-	                                        		<select name = "rest_name" class="form-control">
+													<label class="control-label">Restaurant</label>
+													<select name="rest_name" class="form-control">
 														{% for item in data %}
-	                                                	<option name = "display_name"> {{ item.rest_name}}, {{ item.rest_id }} </option>
-														<label name = "rest_id" style="display: none;">{{ item.rest_id }}</label>
+														<option name="display_name">
+															{{ item.rest_name}}, {{item.rest_id }} </option>
+														<label name="rest_id" style="display: none;">
+															{{item.rest_id}}</label>
 														{% endfor %}
 
-		                                        	</select>
-													
-		                                    	</div>
+													</select>
 
-		                                	</div>
-										
-		                            	</div>
-										<div class="col-sm-12">
-											<h4 class="info-text"> Cannot find your Restaurant. Click here to <a href="{% url 'add_rest'%}">search and add. </a></h4>
-											
+												</div>
+
+											</div>
+
 										</div>
-		                            </div>
-		                            <div class="tab-pane" id="captain">
-		                                <table>
+										<div class="col-sm-12">
+											<h4 class="info-text"> Cannot find your Restaurant. Click here to <a
+													href="{% url 'add_rest'%}">search and add. </a></h4>
+
+										</div>
+									</div>
+									<div class="tab-pane" id="captain">
+										<table>
 											<tr>
 												<td>
-													<label class="info-text" for="guests_size">Number of guests you are expecting?</label>
+													<label class="info-text" for="guests_size">Number of guests you are
+														expecting?</label>
 												</td>
-												
+
 												<td>
-													<input class="info-text" name="guests_size" type="text">	
+													<input class="info-text" name="guests_size" type="text">
 
 												</td>
 
 											</tr>
-											
+
 											<tr>
 												<td>
-													<label class="info-text" for="date_picker123">Select date for reservation.</label>
+													<label class="info-text" for="date_picker123">Select date for
+														reservation.</label>
 
 												</td>
-												
+
 												<td>
-													<input class="info-text" type="date" id="date_picker123" name="date_picker">
+													<input class="info-text" type="date" id="date_picker123"
+														name="date_picker">
 
 												</td>
 
 											</tr>
 											<tr>
 												<td>
-													<label class="info-text" for="appt-time">Book Reservation between: </label>
+													<label class="info-text" for="appt-time">Book Reservation between:
+													</label>
 												</td>
 												<td>
 													<label class="info-text" for="from_time">From: </label>
@@ -150,75 +157,142 @@
 												</td>
 											</tr>
 										</table>
-		                                
-		                            </div>
+
+									</div>
 									<div class="tab-pane" id="description">
-										
-		                            	<div class="row">
-			                            	<div class="col-sm-6">
-												<div class="form-group" class="col-sm-4">
-													<h4>RESY Account Email</h4>
-													<input name="resy_email" type="text" class="form-control" placeholder="Your Email *" value="" />
-												</div>
-												<div class="form-group" class="col-sm-4">
-													<h4>RESY Account Password</h4>
 
-													<input name="resy_pwd" type="password" class="form-control" placeholder="Your Password *" value="" />
-												</div>
+										<div class="row">
+											<div class="col-sm-10">
 
-			                                </div>
+												<form method='POST'>
 
-		                            	</div>
+													<button type="submit" name="btnform2">Save Changes</button>
+												</form>
+												<p><a href="{% url 'save_in_session' %}">Save details</a></p>
+												{% if session %}
+													<h3>Welcome {{session.userinfo.name}}!</h3>
+													<p><a href="{% url 'logout' %}">Logout</a></p>
+													
+													{% if user_details %}
+														<p>Your Resy details will be fetched from account.</p>
+													{% else %}
+														<p>Could not find the details. Please fill details manually.</p>
+														<h5 class="info-text"> Please provide your RESY account details.</h5>
+														<input name="resy_email" type="text" class="form-control"
+															placeholder="RESY Email *" value="" />
+														<input name="resy_pwd" type="password" class="form-control"
+															placeholder="RESY Password *" value="" />
 
-										
-		                            </div>
+													{% endif %}
+												{% else %}
+												<h3>Welcome Guest</h3>
+												<h5 class="info-text"> Please provide your RESY account details. or
+													Click
+													to <a href={% url 'fetch_user' %}>Login</a></h5>
+												<input name="resy_email" type="text" class="form-control"
+													placeholder="RESY Email *" value="" />
+												<input name="resy_pwd" type="password" class="form-control"
+													placeholder="RESY Password *" value="" />
 
-		                        </div>
-	                        	<div class="wizard-footer">
-	                            	<div class="pull-right">
-	                                    <input type='button' class='btn btn-next btn-fill btn-danger btn-wd' name='next' value='Next' />
-	                                    <input type='submit' class='btn btn-finish btn-fill btn-danger btn-wd' name='finish' value='Finish' />
-	                                </div>
-	                                <div class="pull-left">
-	                                    <input type='button' class='btn btn-previous btn-fill btn-default btn-wd' name='previous' value='Previous' />
+
+												{% endif %}
+
+
+											</div>
+
+
+										</div>
+
+
+									</div>
+									<div class="tab-pane" id="confirm_booking">
+
+										<div class="row">
+											<div class="col-sm-10">
+												<h3>Your booking details are as follows:</h3>
+												{% if booking_obj %}
+												<h5>Restaurant Name: <strong>{{booking_obj.rest_name}}!</strong></h5>
+												<h5>Date of Reservation: <strong>{{booking_obj.date}}.</strong></h5>
+												<h5>Slot Selected: <strong>{{booking_obj.from_time}} -
+														{{booking_obj.to_time}}</strong></h5>
+												<h5>Number of guests: <strong>{{booking_obj.number_of_guests}}</strong>
+												</h5>
+
+												{% else %}
+												{% if booking_details %}
+												<h5>Restaurant Name: {{booking_details.rest_name}}!</h5>
+												<h5>Date of Reservation: {{booking_details.rest_name}}</h5>
+												<h5>Slot Selected: {{booking_details.rest_name}}</h5>
+												<h5>Number of guests: {{booking_details.rest_name}}</h5>
+												{% endif %}
+
+
+												{% endif %}
+
+
+											</div>
+
+
+										</div>
+
+
+									</div>
+
+
+								</div>
+
+								<div class="wizard-footer">
+									<div class="pull-right">
+										<input type='button' class='btn btn-next btn-fill btn-danger btn-wd' name='next'
+											value='Next' />
+										<form method='POST'>
+											{% csrf_token %}
+											<input type='submit' class='btn btn-finish btn-fill btn-danger btn-wd'
+												name='btnform1' value='Finish' />
+										</form>
+									</div>
+									<div class="pull-left">
+										<input type='button' class='btn btn-previous btn-fill btn-default btn-wd'
+											name='previous' value='Previous' />
 
 										<div class="footer-checkbox">
 											<div class="col-sm-12">
 												{% if data %}<h4>{{ data.message }}</h4>{% endif %}
-											  <div class="checkbox">
-												  <label>
-													  <input type="checkbox" name="optionsCheckboxes">
-												  </label>
-												  Agree to pay cancellation charges.
-											  </div>
-										  </div>
+												<div class="checkbox">
+													<label>
+														<input type="checkbox" name="optionsCheckboxes">
+													</label>
+													Agree to pay cancellation charges.
+												</div>
+											</div>
 										</div>
-	                                </div>
-	                                <div class="clearfix"></div>
-	                        	</div>
-		                    </form>
-		                </div>
+									</div>
+									<div class="clearfix"></div>
+								</div>
+							</form>
+						</div>
 						<a class="btn btn-primary" href="/">Home</a>
 						<a class="btn btn-primary" href="/cancel_booking">Cancel Booking</a>
 
 						<a class="btn btn-primary" href="/search">View All Restaurant(s) on RESY</a>
-		            </div> <!-- wizard container -->
-		        </div>
-	    	</div> <!-- row -->
+					</div> <!-- wizard container -->
+				</div>
+			</div> <!-- row -->
 		</div> <!--  big container -->
 
 
 	</div>
 
 </body>
-	<!--   Core JS Files   -->
-	<script src="{% static 'assets/js/jquery-2.2.4.min.js' %}" type="text/javascript"></script>
-	<script src="{% static 'assets/js/bootstrap.min.js' %}" type="text/javascript"></script>
-	<script src="{% static 'assets/js/jquery.bootstrap.js' %}" type="text/javascript"></script>
+<!--   Core JS Files   -->
+<script src="{% static 'assets/js/jquery-2.2.4.min.js' %}" type="text/javascript"></script>
+<script src="{% static 'assets/js/bootstrap.min.js' %}" type="text/javascript"></script>
+<script src="{% static 'assets/js/jquery.bootstrap.js' %}" type="text/javascript"></script>
 
-	<!--  Plugin for the Wizard -->
-	<script src="{% static 'assets/js/material-bootstrap-wizard.js' %}"></script>
+<!--  Plugin for the Wizard -->
+<script src="{% static 'assets/js/material-bootstrap-wizard.js' %}"></script>
 
-	<!--  More information about jquery.validate here: http://jqueryvalidation.org/	 -->
-	<script src="{% static 'assets/js/jquery.validate.min.js' %}"></script>
+<!--  More information about jquery.validate here: http://jqueryvalidation.org/	 -->
+<script src="{% static 'assets/js/jquery.validate.min.js' %}"></script>
+
 </html>

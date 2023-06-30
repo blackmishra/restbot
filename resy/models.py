@@ -15,6 +15,19 @@ class Resy(models.Model):
         return self.task
     
 
+class User(models.Model):
+    resy_email = models.CharField(max_length = 180, null=False, default='abc@email.com')
+    resy_pwd = models.CharField(max_length = 180, null=False, default='abc')
+    user_name = models.CharField(max_length = 180, null=False, default='abc')
+    user_email = models.CharField(max_length = 180, null=False, default='abc@email.com')
+    user_token = models.TextField(default='abc')
+    updated_at = models.DateTimeField(auto_now = True)
+    created_at = models.DateTimeField(auto_now_add = True)
+
+    def __str__(self):
+        return f"Name:{self.user_name}, Email: {self.user_email}"
+
+
 class Restaurant(models.Model):
     rest_name = models.CharField(max_length = 180, null=False, blank=False)
     rest_id = models.IntegerField(primary_key=True, default=0)
@@ -30,17 +43,12 @@ class Reservation_request(models.Model):
     rest_name = models.CharField(max_length = 180, null=False)
     rest_id = models.IntegerField(null=False, blank=False)
     date = models.DateField(null=False, blank=False)
+    from_time = models.TimeField(default=time(8, 0))
+    to_time = models.TimeField(default=time(8, 0))
     number_of_guests = models.IntegerField(null=False, blank=False)
     booking_available_till = models.DateField(null=False, blank=False)
     is_booking_date_active = models.BooleanField(default=False)
-    user_token = models.TextField(default='abc')
-    resy_email = models.CharField(max_length = 180, null=False, default='abc')
-    resy_pwd = models.CharField(max_length = 180, null=False, default='abc')
     booking_status = models.CharField(max_length = 100, null=False, default='Pending')
-    reservation_id = models.TextField(default='abc')
-    reservation_cnf_token = models.TextField(default='abc')
-    from_time = models.TimeField(default=time(8, 0))
-    to_time = models.TimeField(default=time(8, 0))
 
     def __str__(self):
         booking_desc = f"Booking of {self.number_of_guests} at {self.rest_name} on {self.date}"
@@ -69,5 +77,12 @@ class Reservation_request(models.Model):
             return True
         
     
+class Booking_details(models.Model):
+    booking_id = models.ForeignKey(Reservation_request, on_delete = models.CASCADE, blank = True, null = True)
+    booking_status = models.CharField(max_length = 100, null=False, default='Pending')
+    reservation_id = models.TextField(default='abc')
+    reservation_cnf_token = models.TextField(default='abc')
 
-
+    def __str__(self):
+        return self.booking_id
+    
