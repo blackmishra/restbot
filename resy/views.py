@@ -147,15 +147,12 @@ class Request_booking(APIView):
         """
         rest_name, rest_id = request.data.get("rest_name").split(",")
         booking_id = str(uuid.uuid1())
-        resy_email = request.data.get("resy_email")
         data = {
             "rest_name": rest_name,
             "rest_id": rest_id,
             "date": request.data.get("date_picker"),
             "number_of_guests": request.data.get("guests_size"),
             "booking_available_till": today_date,
-            "resy_email": resy_email,
-            "resy_pwd": request.data.get("resy_pwd"),
             "from_time": request.data.get("from_time"),
             "to_time": request.data.get("to_time"),
             "booking_id": booking_id,
@@ -177,12 +174,11 @@ class Request_booking(APIView):
                 "booking_id": booking_id,
                 "subject": subject,
                 "message": message,
-                "resy_email": resy_email,
             }
             context["result"] = serializer.data
             context["message"] = message
             request.session["booking_details"] = booking_details
-            return redirect('fetch_user')
+            return redirect("fetch_user")
             # return render(
             #     request,
             #     context=context,
@@ -451,6 +447,7 @@ class Fetch_user(APIView):
         )
 
     def post(self, request, *args, **kwargs):
+        print("Inside View")
         if request.session.get("user_details") is None:
             data = {
                 "resy_email": request.data.get("resy_email"),
@@ -462,16 +459,25 @@ class Fetch_user(APIView):
             serializer = UserSerializer(data=data)
 
             if serializer.is_valid():
-                serializer.save()
-                message = "Resy Details saved successfully."
-                req_status = status.HTTP_201_CREATED
-                if request.session.get("booking_details") is not None:
-                    booking_details = request.session.get("booking_details")
-                    send_email(
-                        booking_details["subject"],
-                        booking_details["message"],
-                        booking_details["resy_email"],
-                    )
+                if User.objects.filter(user_id=data["user_email"]):
+                    message = "User already exists."
+                    req_status = status.HTTP_200_OK
+                else:
+                    serializer.save()
+                    message = "Resy Details saved successfully."
+                    req_status = status.HTTP_201_CREATED
+                    if request.session.get("booking_details") is not None:
+                        booking_details = request.session.get("booking_details")
+                        Reservation_request.objects.filter(
+                            booking_id=booking_details["booking_id"]
+                        ).update(user_email=data["user_email"])
+
+                        # Send Email on successfull booking_request
+                        send_email(
+                            booking_details["subject"],
+                            booking_details["message"],
+                            user_email,
+                        )
             else:
                 message = serializer.errors
                 req_status = status.HTTP_400_BAD_REQUEST
@@ -484,10 +490,16 @@ class Fetch_user(APIView):
             )
         if request.session.get("booking_details") is not None:
             booking_details = request.session.get("booking_details")
+            user_email = request.session.get("user")["userinfo"]["email"]
+
+            Reservation_request.objects.filter(
+                booking_id=booking_details["booking_id"]
+            ).update(user_email=user_email)
+
             send_email(
                 booking_details["subject"],
                 booking_details["message"],
-                booking_details["resy_email"],
+                user_email,
             )
-        else:
-            return Response("Booking Completed.", status=status.HTTP_201_CREATED)
+
+        return Response("Booking Completed.", status=status.HTTP_201_CREATED)
