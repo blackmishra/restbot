@@ -63,24 +63,8 @@ class SearchTemplateView(TemplateView):
                 "query": "",
             }
         )
-        headers = {
-            "authority": "api.resy.com",
-            "accept": "application/json, text/plain, */*",
-            "accept-language": "en-GB,en;q=0.8",
-            "authorization": 'ResyAPI api_key="VbWk7s3L4KiK5fzlO7JD3Q5EYolJI7n5"',
-            "cache-control": "no-cache",
-            "content-type": "application/json",
-            "origin": "https://resy.com",
-            "referer": "https://resy.com/",
-            "sec-fetch-dest": "empty",
-            "sec-fetch-mode": "cors",
-            "sec-fetch-site": "same-site",
-            "sec-gpc": "1",
-            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36",
-            "x-origin": "https://resy.com",
-            # 'x-resy-auth-token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJleHAiOjE2Nzg0OTUwNzQsInVpZCI6Mzg4MDE2OTIsImd0IjoiY29uc3VtZXIiLCJncyI6W10sImV4dHJhIjp7Imd1ZXN0X2lkIjoxMjkyNjQ1MDZ9fQ.APZepm-Z5Yl8ECqA315ub0p11SJcvItCrrIZch1mNMrW3tEONvU9h2bLeodTaADeY6ojUzalNP9iQ40CKqhLWxUXAd-OUBqtsfwvSn2zukd14d9WZb1WuPZCPv_8D8jG--hMw3vVjJwvtLDwr0pAefqf_IIl7bzXc74tujLKN24DQRtC',
-            # 'x-resy-universal-auth': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJleHAiOjE2Nzg0OTUwNzQsInVpZCI6Mzg4MDE2OTIsImd0IjoiY29uc3VtZXIiLCJncyI6W10sImV4dHJhIjp7Imd1ZXN0X2lkIjoxMjkyNjQ1MDZ9fQ.APZepm-Z5Yl8ECqA315ub0p11SJcvItCrrIZch1mNMrW3tEONvU9h2bLeodTaADeY6ojUzalNP9iQ40CKqhLWxUXAd-OUBqtsfwvSn2zukd14d9WZb1WuPZCPv_8D8jG--hMw3vVjJwvtLDwr0pAefqf_IIl7bzXc74tujLKN24DQRtC'
-        }
+        headers = ast.literal_eval(settings.RESY_HEADERS)
+
         response = requests.post(url, headers=headers, data=payload)
         data = response.json()
 
@@ -116,21 +100,7 @@ class RestTemplateView(APIView):
         # Search specific restaurant details
         url = f"{CONST.FIND_REST_API}{current_date}&party_size=2&venue_id={rest_id}"
         payload = {}
-        headers = {
-            "authority": "api.resy.com",
-            "accept": "application/json, text/plain, */*",
-            "accept-language": "en-GB,en;q=0.8",
-            "authorization": 'ResyAPI api_key="VbWk7s3L4KiK5fzlO7JD3Q5EYolJI7n5"',
-            "cache-control": "no-cache",
-            "origin": "https://resy.com",
-            "referer": "https://resy.com/",
-            "sec-fetch-dest": "empty",
-            "sec-fetch-mode": "cors",
-            "sec-fetch-site": "same-site",
-            "sec-gpc": "1",
-            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36",
-            "x-origin": "https://resy.com",
-        }
+        headers = ast.literal_eval(settings.RESY_HEADERS)
 
         response = requests.request("GET", url, headers=headers, data=payload)
         data = response.json()
@@ -165,144 +135,31 @@ class RestTemplateView(APIView):
         return Response(self.context)
 
 
-class Session_save(APIView):
-    def get(self, request):
-        print(request.session["booking_details"])
-        print(request.session["user_details"])
-
-        # return Response("Session Data Saved. ", status=status.HTTP_201_CREATED)
-        return redirect("booking_page")
-
-
 class Request_booking(APIView):
-    def __init__(self, **kwargs: Any) -> None:
-        super().__init__(**kwargs)
-        self.context = {}
-
     def get(self, request, *args, **kwargs):
         rest_objs = list(Restaurant.objects.all().order_by("rest_name").values())
-        user_details = None
-        booking_obj = request.session.get("booking_details")
-
-        if request.session.get("user"):
-            user_email = request.session.get("user")["userinfo"]["email"]
-            user_queryset = User.objects.filter(user_email=user_email).values(
-                "resy_email", "resy_pwd", "user_name", "user_email"
-            )
-            user_details = list(user_queryset)[0]
-            if user_details:
-                request.session["user_details"] = user_details
-                print("Writing User details")
-            else:
-                print("User details not found")
-
-        self.context = {
-            "data": rest_objs,
-            "session": request.session.get("user"),
-            "booking_obj": booking_obj,
-        }
-
-        return render(request, "booking.html", self.context)
+        context = {"data": rest_objs}
+        return render(request, "booking.html", context)
 
     def post(self, request, *args, **kwargs):
         """
         Create the reservation request with given data
         """
-
-        if "btnform2" in request.POST:
-            print("Random Joe 1")
-
-            booking_details = {
-                "date": request.data.get("date_picker"),
-                "from_time": request.data.get("from_time"),
-                "to_time": request.data.get("to_time"),
-                "number_of_guests": request.data.get("guests_size"),
-            }
-            print("Random Joe 2")
-
-            (
-                booking_details["rest_name"],
-                booking_details["rest_id"],
-            ) = request.data.get("rest_name").split(",")
-            print("Random Joe 3")
-            user_details = []
-            print(
-                "Email and pwd: ",
-                request.data.get("resy_email"),
-                request.data.get("resy_pwd"),
-            )
-            if request.session.get("user"):
-                user_details = {
-                    "resy_email": request.data.get("resy_email"),
-                    "resy_pwd": request.data.get("resy_pwd"),
-                    "user_name": request.session.get("user")["userinfo"]["name"],
-                    "user_email": request.session.get("user")["userinfo"]["email"],
-                }
-            print("User details:", user_details)
-            if request.session.get("booking_details") is None:
-                request.session["booking_details"] = booking_details
-            if request.session.get("user_details") is None:
-                request.session["user_details"] = user_details
-            else:
-                print(request.session.get("user_details"))
-
-            # return render(request, "booking.html", self.context)
-            # return Response("Session Data Saved. ", status=status.HTTP_201_CREATED)
-            return redirect("save_in_session")
-
-        print("Random Joe 4")
-        print(
-                "Email and pwd: ",
-                request.data.get("resy_email"),
-                request.data.get("resy_pwd"),
-            )
-        user_details = request.session.get("user_details")
-        print(user_details)
-
-
-
-        if user_details is None:
-            if request.session.get("user"):
-                session_email = request.session.get("user")["userinfo"]["email"]
-                session_name = request.session.get("user")["userinfo"]["name"]
-            else:
-                session_email = request.data.get("resy_email")
-                session_name = request.data.get("resy_email")
-
-            user_details = {
-                "resy_email": request.data.get("resy_email"),
-                "resy_pwd": request.data.get("resy_pwd"),
-                "user_name": session_name,
-                "user_email": session_email,
-            }
-        print(user_details)
-        rest_name = request.session["booking_details"]["rest_name"]
-        rest_id = request.session["booking_details"]["rest_id"]
+        rest_name, rest_id = request.data.get("rest_name").split(",")
         booking_id = str(uuid.uuid1())
-        resy_email = user_details["resy_email"] if user_details else None
-        resy_pwd = user_details["resy_pwd"] if user_details else None
+        resy_email = request.data.get("resy_email")
         data = {
             "rest_name": rest_name,
             "rest_id": rest_id,
-            "date": request.session["booking_details"]["date"],
-            "number_of_guests": (
-                request.session["booking_details"]["number_of_guests"]
-            ),
+            "date": request.data.get("date_picker"),
+            "number_of_guests": request.data.get("guests_size"),
             "booking_available_till": today_date,
-            "from_time": request.session["booking_details"]["from_time"],
-            "to_time": request.session["booking_details"]["to_time"],
+            "resy_email": resy_email,
+            "resy_pwd": request.data.get("resy_pwd"),
+            "from_time": request.data.get("from_time"),
+            "to_time": request.data.get("to_time"),
             "booking_id": booking_id,
         }
-        if resy_email and resy_pwd:
-            user_data = {
-                "resy_email": resy_email,
-                "resy_pwd": resy_pwd,
-                "user_email": user_details["user_email"] or None,
-                "user_name": user_details["user_name"] or None,
-            }
-            serializer = UserSerializer(data=user_data)
-            if serializer.is_valid():
-                serializer.save()
 
         serializer = BookingSerializer(data=data)
         context = {}
@@ -311,28 +168,31 @@ class Request_booking(APIView):
             serializer.save()
 
             subject = "Booking Request: Successfully created."
-            message = (
-                f"{subject} \n\n Your Booking ID : {booking_id}. \n\n"
-                f"\nYou may receive another notification when your reservation is confirmed."
-                f"This mail is just to inform you that we have received your booking request. "
-                f"It does not guarentee you will get the reservation."
-            )
+            message = f"{subject} \n\n Your Booking ID : {booking_id}. \n\n"
+            f"\nYou may receive another notification when your reservation is confirmed. "
+            f"This mail is just to inform you that we have received your booking request. "
+            f"It does not guarentee you will get the reservation."
 
+            booking_details = {
+                "booking_id": booking_id,
+                "subject": subject,
+                "message": message,
+                "resy_email": resy_email,
+            }
             context["result"] = serializer.data
             context["message"] = message
-
-            send_email(subject, context["message"], resy_email)
-            return render(
-                request,
-                context=context,
-                status=status.HTTP_201_CREATED,
-                template_name="status.html",
-            )
+            request.session["booking_details"] = booking_details
+            return redirect('fetch_user')
+            # return render(
+            #     request,
+            #     context=context,
+            #     status=status.HTTP_201_CREATED,
+            #     template_name="user_page.html",
+            # )
         context["result"] = serializer.errors
         context[
             "message"
         ] = "BAD INPUT. Booking Request: Failed to create. Please try again with valid input."
-        print(context)
 
         return render(
             request,
@@ -363,22 +223,8 @@ class Populate_Restaurants(APIView):
                 "query": "",
             }
         )
-        headers = {
-            "authority": "api.resy.com",
-            "accept": "application/json, text/plain, */*",
-            "accept-language": "en-GB,en;q=0.8",
-            "authorization": 'ResyAPI api_key="VbWk7s3L4KiK5fzlO7JD3Q5EYolJI7n5"',
-            "cache-control": "no-cache",
-            "content-type": "application/json",
-            "origin": "https://resy.com",
-            "referer": "https://resy.com/",
-            "sec-fetch-dest": "empty",
-            "sec-fetch-mode": "cors",
-            "sec-fetch-site": "same-site",
-            "sec-gpc": "1",
-            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36",
-            "x-origin": "https://resy.com",
-        }
+        headers = ast.literal_eval(settings.RESY_HEADERS)
+
         response = requests.post(url, headers=headers, data=payload)
         print(response.status_code)
         data = response.json()
@@ -418,22 +264,7 @@ class Get_Booking_Token(APIView):
         )
 
         print(payload)
-        headers = {
-            "authority": "api.resy.com",
-            "accept": "application/json, text/plain, */*",
-            "accept-language": "en-GB,en;q=0.8",
-            "authorization": 'ResyAPI api_key="VbWk7s3L4KiK5fzlO7JD3Q5EYolJI7n5"',
-            "cache-control": "no-cache",
-            "content-type": "application/json",
-            "origin": "https://widgets.resy.com",
-            "referer": "https://widgets.resy.com/",
-            "sec-fetch-dest": "empty",
-            "sec-fetch-mode": "cors",
-            "sec-fetch-site": "same-site",
-            "sec-gpc": "1",
-            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36",
-            "x-origin": "https://widgets.resy.com",
-        }
+        headers = ast.literal_eval(settings.RESY_HEADERS)
 
         response = requests.request("POST", url, headers=headers, data=payload)
         data = response.json()
@@ -451,22 +282,8 @@ class Make_Booking(APIView):
         payload = f"book_token={booking_token}&source_id=resy.com-venue-details"
 
         # add replace = 1 in payload to update booking slot
-        headers = {
-            "authority": "api.resy.com",
-            "accept": "application/json, text/plain, */*",
-            "accept-language": "en-GB,en;q=0.8",
-            "authorization": 'ResyAPI api_key="VbWk7s3L4KiK5fzlO7JD3Q5EYolJI7n5"',
-            "cache-control": "no-cache",
-            "content-type": "application/x-www-form-urlencoded",
-            "origin": "https://widgets.resy.com",
-            "referer": "https://widgets.resy.com/",
-            "sec-fetch-dest": "empty",
-            "sec-fetch-mode": "cors",
-            "sec-fetch-site": "same-site",
-            "sec-gpc": "1",
-            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
-            "x-origin": "https://widgets.resy.com",
-        }
+        headers = ast.literal_eval(settings.RESY_HEADERS)
+
         headers["x-resy-auth-token"] = auth_token
         headers["x-resy-universal-auth"] = auth_token
         try:
@@ -509,25 +326,7 @@ class Add_Restaurant(APIView):
                 "types": ["venue", "cuisine"],
             }
         )
-        headers = {
-            "authority": "api.resy.com",
-            "accept": "application/json, text/plain, */*",
-            "accept-language": "en-GB,en;q=0.8",
-            "authorization": 'ResyAPI api_key="VbWk7s3L4KiK5fzlO7JD3Q5EYolJI7n5"',
-            "cache-control": "no-cache",
-            "content-type": "application/json",
-            "origin": "https://resy.com",
-            "referer": "https://resy.com/",
-            "sec-ch-ua": '"Brave";v="111", "Not(A:Brand";v="8", "Chromium";v="111"',
-            "sec-ch-ua-mobile": "?0",
-            "sec-ch-ua-platform": '"Linux"',
-            "sec-fetch-dest": "empty",
-            "sec-fetch-mode": "cors",
-            "sec-fetch-site": "same-site",
-            "sec-gpc": "1",
-            "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
-            "x-origin": "https://resy.com",
-        }
+        headers = ast.literal_eval(settings.RESY_HEADERS)
 
         response = requests.request("POST", url, headers=headers, data=payload)
 
@@ -577,25 +376,7 @@ class User_auth_token(APIView):
         user_email = request.data.get("resy_email")
         user_pwd = request.data.get("resy_pwd")
         payload = f"email={user_email}&password={user_pwd}"
-        headers = {
-            "authority": "api.resy.com",
-            "accept": "application/json, text/plain, */*",
-            "accept-language": "en-GB,en;q=0.9",
-            "authorization": 'ResyAPI api_key="VbWk7s3L4KiK5fzlO7JD3Q5EYolJI7n5"',
-            "cache-control": "no-cache",
-            "content-type": "application/x-www-form-urlencoded",
-            "origin": "https://resy.com",
-            "referer": "https://resy.com/",
-            "sec-ch-ua": '"Brave";v="111", "Not(A:Brand";v="8", "Chromium";v="111"',
-            "sec-ch-ua-mobile": "?0",
-            "sec-ch-ua-platform": '"Linux"',
-            "sec-fetch-dest": "empty",
-            "sec-fetch-mode": "cors",
-            "sec-fetch-site": "same-site",
-            "sec-gpc": "1",
-            "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
-            "x-origin": "https://resy.com",
-        }
+        headers = ast.literal_eval(settings.RESY_HEADERS)
 
         response = requests.request("POST", url, headers=headers, data=payload)
         print(response)
@@ -647,43 +428,66 @@ class Cancel_Booking(APIView):
 
 class Fetch_user(APIView):
     def get(self, request, *args, **kwargs):
-        if request.session.get("user") is None:
-            return redirect("login")
+        user_queryset = None
+        if request.session.get("user"):
+            user_email = request.session.get("user")["userinfo"]["email"]
+            user_queryset = User.objects.filter(user_email=user_email).values(
+                "resy_email", "resy_pwd", "user_name", "user_email"
+            )
+            if user_queryset:
+                request.session["user_details"] = json.dumps(
+                    list(user_queryset)[0], indent=4
+                )
         return render(
             request,
             "user_page.html",
             context={
                 "session": request.session.get("user"),
                 "pretty": json.dumps(request.session.get("user"), indent=4),
+                "user_details": json.dumps(list(user_queryset)[0], indent=4)
+                if user_queryset
+                else None,
             },
         )
 
     def post(self, request, *args, **kwargs):
-        headers = ast.literal_eval(settings.RESY_HEADERS)
-        resy_url = CONST.CANCEL_API
-        booking_id = request.data.get("booking_id")
-        print(booking_id)
-        req = Reservation_request.objects.get(booking_id=booking_id)
-        auth_token = req.user_token
-        reservation_cnf_token = req.reservation_cnf_token
+        if request.session.get("user_details") is None:
+            data = {
+                "resy_email": request.data.get("resy_email"),
+                "resy_pwd": request.data.get("resy_pwd"),
+                "user_email": request.data.get("resy_email"),
+                "user_name": request.data.get("resy_email"),
+            }
 
-        payload = f"resy_token={reservation_cnf_token}"
-        headers["x-resy-auth-token"] = auth_token
-        headers["x-resy-universal-auth"] = auth_token
+            serializer = UserSerializer(data=data)
 
-        response = requests.request("POST", resy_url, headers=headers, data=payload)
-        if response.status_code == 200:
-            subject = "Booking Cancelled Successfully."
-            message = f"Your Reservation with Booking-ID: {booking_id}, cancelled successfully."
-            req.booking_status = "Cancelled"
-            req.save()
-            send_email(subject, message, req.resy_email)
+            if serializer.is_valid():
+                serializer.save()
+                message = "Resy Details saved successfully."
+                req_status = status.HTTP_201_CREATED
+                if request.session.get("booking_details") is not None:
+                    booking_details = request.session.get("booking_details")
+                    send_email(
+                        booking_details["subject"],
+                        booking_details["message"],
+                        booking_details["resy_email"],
+                    )
+            else:
+                message = serializer.errors
+                req_status = status.HTTP_400_BAD_REQUEST
+
+            return render(
+                request,
+                context={"message": message},
+                status=req_status,
+                template_name="status.html",
+            )
+        if request.session.get("booking_details") is not None:
+            booking_details = request.session.get("booking_details")
+            send_email(
+                booking_details["subject"],
+                booking_details["message"],
+                booking_details["resy_email"],
+            )
         else:
-            message = "Could not cancel the booking. Please try again."
-
-        return render(
-            request,
-            context={"message": message},
-            status=response.status_code,
-            template_name="status.html",
-        )
+            return Response("Booking Completed.", status=status.HTTP_201_CREATED)

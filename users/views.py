@@ -30,7 +30,7 @@ def login(request):
 def callback(request):
     token = oauth.auth0.authorize_access_token(request)
     request.session["user"] = token
-    return redirect(request.build_absolute_uri(reverse("booking_page")))
+    return redirect(request.build_absolute_uri(reverse("fetch_user")))
 
 
 def logout(request):
@@ -48,6 +48,9 @@ def logout(request):
 
 
 def index(request):
+    request.session['user_email'] = request.session.get("user")["userinfo"]["email"]
+    request.session['user_name'] = request.session.get("user")["userinfo"]["name"]
+
     return render(
         request,
         "user_page.html",

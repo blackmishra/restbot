@@ -1,0 +1,216 @@
+class Session_save(APIView):
+    def get(self, request):
+        print(request.session["booking_details"])
+        print(request.session["user_details"])
+
+        # return Response("Session Data Saved. ", status=status.HTTP_201_CREATED)
+        return redirect("booking_page")
+
+
+class Request_booking(APIView):
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.context = {}
+
+    def get(self, request, *args, **kwargs):
+        rest_objs = list(Restaurant.objects.all().order_by("rest_name").values())
+        user_details = None
+        booking_obj = request.session.get("booking_details")
+
+        if request.session.get("user"):
+            user_email = request.session.get("user")["userinfo"]["email"]
+            user_queryset = User.objects.filter(user_email=user_email).values(
+                "resy_email", "resy_pwd", "user_name", "user_email"
+            )
+            user_details = list(user_queryset)[0]
+            if user_details:
+                request.session["user_details"] = user_details
+                print("Writing User details")
+            else:
+                print("User details not found")
+
+        self.context = {
+            "data": rest_objs,
+            "session": request.session.get("user"),
+            "booking_obj": booking_obj,
+        }
+
+        return render(request, "booking.html", self.context)
+
+    def post(self, request, *args, **kwargs):
+        """
+        Create the reservation request with given data
+        """
+
+        if "btnform2" in request.POST:
+            print("Random Joe 1")
+
+            booking_details = {
+                "date": request.data.get("date_picker"),
+                "from_time": request.data.get("from_time"),
+                "to_time": request.data.get("to_time"),
+                "number_of_guests": request.data.get("guests_size"),
+            }
+            print("Random Joe 2")
+
+            (
+                booking_details["rest_name"],
+                booking_details["rest_id"],
+            ) = request.data.get("rest_name").split(",")
+            print("Random Joe 3")
+            user_details = []
+            print(
+                "Email and pwd: ",
+                request.data.get("resy_email"),
+                request.data.get("resy_pwd"),
+            )
+            if request.session.get("user"):
+                user_details = {
+                    "resy_email": request.data.get("resy_email"),
+                    "resy_pwd": request.data.get("resy_pwd"),
+                    "user_name": request.session.get("user")["userinfo"]["name"],
+                    "user_email": request.session.get("user")["userinfo"]["email"],
+                }
+            print("User details:", user_details)
+            if request.session.get("booking_details") is None:
+                request.session["booking_details"] = booking_details
+            if request.session.get("user_details") is None:
+                request.session["user_details"] = user_details
+            else:
+                print(request.session.get("user_details"))
+
+            # return render(request, "booking.html", self.context)
+            # return Response("Session Data Saved. ", status=status.HTTP_201_CREATED)
+            return redirect("save_in_session")
+
+        print("Random Joe 4")
+        print(
+            "Email and pwd: ",
+            request.data.get("resy_email"),
+            request.data.get("resy_pwd"),
+        )
+        user_details = request.session.get("user_details")
+        print(user_details)
+
+        if user_details is None:
+            if request.session.get("user"):
+                session_email = request.session.get("user")["userinfo"]["email"]
+                session_name = request.session.get("user")["userinfo"]["name"]
+            else:
+                session_email = request.data.get("resy_email")
+                session_name = request.data.get("resy_email")
+
+            user_details = {
+                "resy_email": request.data.get("resy_email"),
+                "resy_pwd": request.data.get("resy_pwd"),
+                "user_name": session_name,
+                "user_email": session_email,
+            }
+        print(user_details)
+        rest_name = request.session["booking_details"]["rest_name"]
+        rest_id = request.session["booking_details"]["rest_id"]
+        booking_id = str(uuid.uuid1())
+        resy_email = user_details["resy_email"] if user_details else None
+        resy_pwd = user_details["resy_pwd"] if user_details else None
+        data = {
+            "rest_name": rest_name,
+            "rest_id": rest_id,
+            "date": request.session["booking_details"]["date"],
+            "number_of_guests": (
+                request.session["booking_details"]["number_of_guests"]
+            ),
+            "booking_available_till": today_date,
+            "from_time": request.session["booking_details"]["from_time"],
+            "to_time": request.session["booking_details"]["to_time"],
+            "booking_id": booking_id,
+        }
+        if resy_email and resy_pwd:
+            user_data = {
+                "resy_email": resy_email,
+                "resy_pwd": resy_pwd,
+                "user_email": user_details["user_email"] or None,
+                "user_name": user_details["user_name"] or None,
+            }
+            serializer = UserSerializer(data=user_data)
+            if serializer.is_valid():
+                serializer.save()
+
+        serializer = BookingSerializer(data=data)
+        context = {}
+
+        if serializer.is_valid():
+            serializer.save()
+
+            subject = "Booking Request: Successfully created."
+            message = (
+                f"{subject} \n\n Your Booking ID : {booking_id}. \n\n"
+                f"\nYou may receive another notification when your reservation is confirmed."
+                f"This mail is just to inform you that we have received your booking request. "
+                f"It does not guarentee you will get the reservation."
+            )
+
+            context["result"] = serializer.data
+            context["message"] = message
+
+            send_email(subject, context["message"], resy_email)
+            return render(
+                request,
+                context=context,
+                status=status.HTTP_201_CREATED,
+                template_name="status.html",
+            )
+        context["result"] = serializer.errors
+        context[
+            "message"
+        ] = "BAD INPUT. Booking Request: Failed to create. Please try again with valid input."
+        print(context)
+
+        return render(
+            request,
+            context=context,
+            status=status.HTTP_400_BAD_REQUEST,
+            template_name="status.html",
+        )
+
+
+<div class="tab-pane" id="description">
+
+										<div class="row">
+											<div class="col-sm-10">
+
+												{% if session %}
+													<h3>Welcome {{session.userinfo.name}}!</h3>
+													<p><a href="{% url 'logout' %}">Logout</a></p>
+													
+													{% if user_details %}
+														<p>Your Resy details will be fetched from account.</p>
+													{% else %}
+														<p>Could not find the details. Please fill details manually.</p>
+														<h5 class="info-text"> Please provide your RESY account details.</h5>
+														<input name="resy_email" type="text" class="form-control"
+															placeholder="RESY Email *" value="" />
+														<input name="resy_pwd" type="password" class="form-control"
+															placeholder="RESY Password *" value="" />
+
+													{% endif %}
+												{% else %}
+												<h3>Welcome Guest</h3>
+												<h5 class="info-text"> Please provide your RESY account details. or
+													Click
+													to <a href={% url 'fetch_user' %}>Login</a></h5>
+												<input name="resy_email" type="text" class="form-control"
+													placeholder="RESY Email *" value="" />
+												<input name="resy_pwd" type="password" class="form-control"
+													placeholder="RESY Password *" value="" />
+
+
+												{% endif %}
+
+
+											</div>
+
+
+										</div>
+
+
+									</div>
