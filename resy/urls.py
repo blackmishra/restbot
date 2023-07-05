@@ -10,6 +10,7 @@ from .views import (
     User_auth_token,
     Cancel_Booking,
     Fetch_user,
+    BookingListView
     # Session_save,
 )
 
@@ -24,6 +25,8 @@ urlpatterns = [
     path('refresh_auth_token', User_auth_token.as_view(), name='refresh_auth_token'),
     path('cancel_booking', Cancel_Booking.as_view(), name = "cancel_booking"),
     path('fetch_user', Fetch_user.as_view(), name = "fetch_user"),
+    path('view_bookings', BookingListView.as_view(), name = "view_bookings"),
+
     # path('save_in_session', Session_save.as_view(), name = "save_in_session"),
 
 

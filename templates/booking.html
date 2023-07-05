@@ -54,11 +54,18 @@
 <body>
 	<div class="image-container set-full-height" style="background-image: url('assets/img/wizard-book.jpg')">
 		<!--   Big container   -->
+		
 		<div class="container">
 			<div class="row">
+				
 				<div class="col-sm-8 col-sm-offset-2">
 					<!--      Wizard container        -->
 					<div class="wizard-container">
+						<a class="btn btn-primary" href="/">Home</a>
+						<a class="btn btn-primary" href="/view_bookings">Past Bookings</a>
+						<a class="btn btn-primary" href="/cancel_booking">Cancel Booking</a>
+
+						<a class="btn btn-primary" href="/search">View All Restaurant(s) on RESY</a>
 						<div class="card wizard-card" data-color="red" id="wizard">
 							<form action="" method="post">
 								{% csrf_token %}
@@ -190,10 +197,7 @@
 								</div>
 							</form>
 						</div>
-						<a class="btn btn-primary" href="/">Home</a>
-						<a class="btn btn-primary" href="/cancel_booking">Cancel Booking</a>
-
-						<a class="btn btn-primary" href="/search">View All Restaurant(s) on RESY</a>
+						
 					</div> <!-- wizard container -->
 				</div>
 			</div> <!-- row -->

@@ -1,25 +1,26 @@
-from typing import Any
-from rest_framework.decorators import api_view
 import ast
 import datetime
 import json
 import uuid
 from datetime import date, datetime
+from typing import Any
 
 import requests
 import yagmail
 from django.conf import settings
 from django.http import HttpRequest
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect, render
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import TemplateView
+from django.views.generic.list import ListView
 from rest_framework import permissions, status
+from rest_framework.decorators import api_view
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from resybookingproject import constants as CONST
 
+from resybookingproject import constants as CONST
 
 from .models import Reservation_request, Restaurant, Resy, User
 from .serializers import (
@@ -28,7 +29,6 @@ from .serializers import (
     ResySerializer,
     UserSerializer,
 )
-
 
 today_date = date.today()
 
@@ -447,13 +447,12 @@ class Fetch_user(APIView):
         )
 
     def post(self, request, *args, **kwargs):
-        print("Inside View")
         if request.session.get("user_details") is None:
             data = {
                 "resy_email": request.data.get("resy_email"),
                 "resy_pwd": request.data.get("resy_pwd"),
-                "user_email": request.data.get("resy_email"),
                 "user_name": request.data.get("resy_email"),
+                "user_email": request.data.get("resy_email"),
             }
 
             serializer = UserSerializer(data=data)
@@ -466,6 +465,7 @@ class Fetch_user(APIView):
                     serializer.save()
                     message = "Resy Details saved successfully."
                     req_status = status.HTTP_201_CREATED
+                    request.session["user_details"] = data
                     if request.session.get("booking_details") is not None:
                         booking_details = request.session.get("booking_details")
                         Reservation_request.objects.filter(
@@ -503,3 +503,19 @@ class Fetch_user(APIView):
             )
 
         return Response("Booking Completed.", status=status.HTTP_201_CREATED)
+
+
+class BookingListView(ListView):
+    model = Reservation_request
+    template_name = "view_bookings.html"
+    context_object_name = "booking_list"
+    paginate_by = 5
+
+    def get_queryset(self):
+        user_details = ast.literal_eval(self.request.session.get("user_details"))
+
+        if user_details.get("user_email"):
+            user_email = user_details.get("user_email")
+
+            return Reservation_request.objects.filter(user_email=user_email)
+        return None
