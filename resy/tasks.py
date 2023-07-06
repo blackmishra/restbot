@@ -20,7 +20,7 @@ today_date = date.today()
 @shared_task
 def update_is_booking_date_flag():
     book_reqs = Reservation_request.objects.all()
-    current_date = today_date
+    current_date = str(today_date)
 
     url = CONST.SEARCH_API
     payload = json.dumps(
@@ -133,7 +133,7 @@ def make_booking_req():
 @shared_task
 def update_restaurants():
     Restaurant.objects.all().delete()
-    current_date = today_date
+    current_date = str(today_date)
     endpoint = f"{BASE_URL}/fetch_and_add_rest"
 
     response = requests.get(endpoint)
