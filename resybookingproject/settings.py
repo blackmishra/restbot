@@ -35,6 +35,7 @@ if RENDER_EXTERNAL_HOSTNAME:
 
 # set the celery broker url
 CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL")
+LOGIN_URL = 'login'
 
 # set the celery result backend
 CELERY_RESULT_BACKEND = os.environ.get("CELERY_BROKER_URL")

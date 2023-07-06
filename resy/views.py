@@ -19,6 +19,7 @@ from rest_framework.decorators import api_view
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from resybookingproject import constants as CONST
 
@@ -425,28 +426,32 @@ class Cancel_Booking(APIView):
 class Fetch_user(APIView):
     def get(self, request, *args, **kwargs):
         user_queryset = None
+        print(request.session.get("user"))
         if request.session.get("user"):
             user_email = request.session.get("user")["userinfo"]["email"]
             user_queryset = User.objects.filter(user_email=user_email).values(
                 "resy_email", "resy_pwd", "user_name", "user_email"
             )
             if user_queryset:
-                request.session["user_details"] = json.dumps(
-                    list(user_queryset)[0], indent=4
+                request.session["user_details"] = (
+                    list(user_queryset)[0] if user_queryset else None
                 )
+
+        booking_details = request.session.get("booking_details")
+
         return render(
             request,
             "user_page.html",
             context={
                 "session": request.session.get("user"),
                 "pretty": json.dumps(request.session.get("user"), indent=4),
-                "user_details": json.dumps(list(user_queryset)[0], indent=4)
-                if user_queryset
-                else None,
+                "booking_details": request.session.get("booking_details"),
+                "user_details": list(user_queryset)[0] if user_queryset else None,
             },
         )
 
     def post(self, request, *args, **kwargs):
+        print(request.session.get("user_details"))
         if request.session.get("user_details") is None:
             data = {
                 "resy_email": request.data.get("resy_email"),
@@ -454,11 +459,11 @@ class Fetch_user(APIView):
                 "user_name": request.data.get("resy_email"),
                 "user_email": request.data.get("resy_email"),
             }
-
+            print(data)
             serializer = UserSerializer(data=data)
 
             if serializer.is_valid():
-                if User.objects.filter(user_id=data["user_email"]):
+                if User.objects.filter(user_email=data["user_email"]):
                     message = "User already exists."
                     req_status = status.HTTP_200_OK
                 else:
@@ -476,7 +481,7 @@ class Fetch_user(APIView):
                         send_email(
                             booking_details["subject"],
                             booking_details["message"],
-                            user_email,
+                            data["user_email"],
                         )
             else:
                 message = serializer.errors
@@ -488,7 +493,9 @@ class Fetch_user(APIView):
                 status=req_status,
                 template_name="status.html",
             )
-        if request.session.get("booking_details") is not None:
+        if request.session.get("booking_details") is not None and request.session.get(
+            "user"
+        ):
             booking_details = request.session.get("booking_details")
             user_email = request.session.get("user")["userinfo"]["email"]
 
@@ -509,13 +516,14 @@ class BookingListView(ListView):
     model = Reservation_request
     template_name = "view_bookings.html"
     context_object_name = "booking_list"
-    paginate_by = 5
+    # paginate_by = 5
 
     def get_queryset(self):
-        user_details = ast.literal_eval(self.request.session.get("user_details"))
+        user_details = self.request.session.get("user")
+        if not user_details:
+            return redirect("fetch_user")
 
         if user_details.get("user_email"):
             user_email = user_details.get("user_email")
-
             return Reservation_request.objects.filter(user_email=user_email)
-        return None
+        return Reservation_request.objects.none()

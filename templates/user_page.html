@@ -138,17 +138,15 @@
 
 <body>
 
-  <div class="image-container set-full-height" style="background-image: url('assets/img/about.jpg')">
-    <div class="body d-md-flex align-items-center justify-content-between">
-      <!-- <div class="box-1 mt-md-0 mt-2">
-        <img
-          src="https://images.pexels.com/photos/2033997/pexels-photo-2033997.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500"
-          class="" alt="">
-      </div> -->
-      <div class=" box-2 d-flex flex-column h-100">
+  <div class="set-full-height mt-5" >
+    
+    <div class="body d-md-flex align-items-center justify-content-between ">
+      
+      <div class="box-2 d-flex flex-column h-100 ">
+        
         <form action="" method="post">
           {% csrf_token %}
-        <div>
+        <div class="mt-5">
           {% if session %}
           <h3>Welcome <br>{{session.userinfo.name}}!</h3>
           <p><a href="{% url 'logout' %}">Logout</a></p>
@@ -158,30 +156,29 @@
           {% endif %}
           {% if user_details %}
           <small class="form-text text-muted">Your Resy Account details will be fetched from account.</small><br><br>
-
-          <input type='submit' class='btn btn-finish btn-fill btn-danger btn-wd' name='complete' value='Complete Booking' />
           {% else %}
-
             <small class="form-text text-muted">Complete your request by providing your Resy Account details.</small>
             <div class="form-group mt-3">
               <label for="resy_email">Resy Email</label>
               <input type="email" class="form-control mt-1" name="resy_email" id="resy_email"
                 aria-describedby="emailHelp" placeholder="Enter email">
+              <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+
             </div>
             <div class="form-group mt-2">
               <label for="resy_pwd">Resy Password</label>
               <input type="password" class="form-control mt-1" name="resy_pwd" id="resy_pwd" placeholder="Password">
             </div>
-            <div>
-              <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+            <br>
+            <input type='submit' class='btn btn-finish btn-fill btn-danger btn-wd' name='complete' value='Save Details' />
 
-            </div>
-            <input type='submit' class='btn btn-finish btn-fill btn-danger btn-wd' name='complete' value='Complete Booking' />
+            <br><br>
+
             {% endif %}
+          <!-- {% if booking_details.booking_id %}
+            <input type='submit' class='btn btn-finish btn-fill btn-danger btn-wd' name='complete' value='Complete Booking' />
+          {% endif %} -->
 
-            <!-- <input type="submit" value="Submit" class="btn btn-primary mt-2" /> -->
-
-        
 
 
           <br><br>
@@ -195,9 +192,10 @@
           </div>
         </div>
       </form>
-        <span class="fas fa-times"></span>
+      <span class="fas fa-times"><a class="btn btn-primary" href="/">Home</a></span>
       </div>
     </div>
+  </div>
 
 
 </body>

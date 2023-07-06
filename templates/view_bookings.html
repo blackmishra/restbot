@@ -55,11 +55,12 @@
 		<h2>List of Bookings</h2>
 
 		<div class="row">
-			<div class="col-sm-11 col-sm-offset-1">
+			<div class="col-sm-12 col-sm-offset-1 mr-5">
 				<div class="wizard-container">
 					<table class="table">
 						<thead class="thead-dark">
 							<tr>
+								<th scope="col">Booked on</th>
 								<th scope="col">Booking ID</th>
 								<th scope="col">Restaurant Name</th>
 								<th scope="col">Restaurant ID</th>
@@ -73,6 +74,7 @@
 						<tbody>
 							{% for item in booking_list %}
 							<tr>
+								<td>{{ item.created_at }}</td>
 								<td>{{ item.booking_id }}</td>
 								<td>{{ item.rest_name }}</td>
 								<td>{{ item.rest_id }}</td>

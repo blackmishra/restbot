@@ -54,6 +54,8 @@ class Reservation_request(models.Model):
     booking_available_till = models.DateField(null=False, blank=False)
     is_booking_date_active = models.BooleanField(default=False)
     booking_status = models.CharField(max_length=100, null=False, default="Pending")
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         booking_desc = (
@@ -91,6 +93,8 @@ class Booking_details(models.Model):
     booking_status = models.CharField(max_length=100, null=False, default="Pending")
     reservation_id = models.TextField(default="abc")
     reservation_cnf_token = models.TextField(default="abc")
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.booking_id
