@@ -1,7 +1,8 @@
 import ast
 import datetime
 import json
-from datetime import datetime
+from datetime import date, datetime
+
 
 import requests
 from celery import shared_task
@@ -13,12 +14,13 @@ from resybookingproject import constants as CONST
 from resybookingproject.settings import BASE_URL
 
 logger = get_task_logger(__name__)
+today_date = date.today()
 
 
 @shared_task
 def update_is_booking_date_flag():
     book_reqs = Reservation_request.objects.all()
-    current_date = str(datetime.date.today())
+    current_date = today_date
 
     url = CONST.SEARCH_API
     payload = json.dumps(
@@ -131,7 +133,7 @@ def make_booking_req():
 @shared_task
 def update_restaurants():
     Restaurant.objects.all().delete()
-    current_date = str(datetime.date.today())
+    current_date = today_date
     endpoint = f"{BASE_URL}/fetch_and_add_rest"
 
     response = requests.get(endpoint)
