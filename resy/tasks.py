@@ -12,6 +12,9 @@ from django.conf import settings
 from resy.models import Booking_details, Reservation_request, Restaurant, User
 from resybookingproject import constants as CONST
 from resybookingproject.settings import BASE_URL
+from json import dumps
+from bson import json_util
+
 
 logger = get_task_logger(__name__)
 today_date = date.today()
@@ -20,7 +23,8 @@ today_date = date.today()
 @shared_task
 def update_is_booking_date_flag():
     book_reqs = Reservation_request.objects.all()
-    current_date = str(today_date)
+
+    current_date = dumps(today_date, default=json_util.default)
 
     url = CONST.SEARCH_API
     payload = json.dumps(
@@ -133,7 +137,7 @@ def make_booking_req():
 @shared_task
 def update_restaurants():
     Restaurant.objects.all().delete()
-    current_date = str(today_date)
+    current_date = dumps(today_date, default=json_util.default)
     endpoint = f"{BASE_URL}/fetch_and_add_rest"
 
     response = requests.get(endpoint)
