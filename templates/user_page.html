@@ -170,14 +170,15 @@
               <input type="password" class="form-control mt-1" name="resy_pwd" id="resy_pwd" placeholder="Password">
             </div>
             <br>
+            {% if booking_details.booking_id %}
+            <input type='submit' class='btn btn-finish btn-fill btn-danger btn-wd' name='complete' value='Complete Booking' />
+            {% else %}
             <input type='submit' class='btn btn-finish btn-fill btn-danger btn-wd' name='complete' value='Save Details' />
-
+            {% endif %}
             <br><br>
 
             {% endif %}
-          <!-- {% if booking_details.booking_id %}
-            <input type='submit' class='btn btn-finish btn-fill btn-danger btn-wd' name='complete' value='Complete Booking' />
-          {% endif %} -->
+          
 
 
 
