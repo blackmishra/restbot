@@ -27,7 +27,7 @@ class User(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Name:{self.user_name}, Email: {self.user_email}"
+        return self.user_email
 
 
 class Restaurant(models.Model):

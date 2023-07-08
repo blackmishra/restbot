@@ -104,7 +104,7 @@ def update_is_booking_date_flag():
 def make_booking_req():
     booking_status = False
     book_reqs = Reservation_request.objects.filter(
-        booking_status="Pending", is_booking_date_active=True
+        booking_status="Pending", is_booking_date_active=False
     )
     user_objs = User.objects.all()
 
@@ -114,14 +114,15 @@ def make_booking_req():
 
         payload = {"booking_date": req.date, "rest_id": rest_id}
         response = requests.get(endpoint, data=payload)
-        usr = user_objs.filter(user_email= req.user_email)
-        auth_token = usr.user_token
+        usr = user_objs.filter(user_email=req.user_email).values().first()
+        auth_token = usr['user_token']
         data = response.json()
 
         # Get Booking Token and try making a reservation.
         for slot in data["data"]["config_details"]:
             # Get Booking Token
-            slot_time = datetime.datetime.strptime(slot["time"], "%H:%M:%S").time()
+            slot_time = datetime.strptime(slot["time"], "%H:%M:%S").time()
+
             if slot_time >= req.from_time and slot_time <= req.to_time:
                 url = f"{BASE_URL}/get_booking_token"
                 payload = {
