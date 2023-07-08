@@ -536,3 +536,11 @@ class BookingListView(ListView):
             user_email = user_details.get("user_email")
             return Reservation_request.objects.filter(user_email=user_email)
         return Reservation_request.objects.none()
+
+
+class TestAPI(APIView):
+    def get(self, request, *args, **kwargs):
+        
+        print(data)
+        print(type(data))
+        return Response("All seems good.", status=status.HTTP_200_OK)

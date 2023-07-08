@@ -13,11 +13,13 @@ from resy.models import Booking_details, Reservation_request, Restaurant, User
 from resybookingproject import constants as CONST
 from resybookingproject.settings import BASE_URL
 from json import dumps
-from bson import json_util
+from django.core.serializers.json import DjangoJSONEncoder
+
 
 
 logger = get_task_logger(__name__)
-today_date = date.today()
+today_date = json.dumps(date.today(), cls=DjangoJSONEncoder)
+
 default_headers = {
     "authority": "api.resy.com",
     "accept": "application/json, text/plain, */*",
@@ -43,7 +45,7 @@ default_headers = {
 def update_is_booking_date_flag():
     book_reqs = Reservation_request.objects.all()
 
-    current_date = dumps(today_date, default=json_util.default)
+    current_date = today_date
 
     url = CONST.SEARCH_API
     payload = json.dumps(
@@ -156,7 +158,7 @@ def make_booking_req():
 @shared_task
 def update_restaurants():
     Restaurant.objects.all().delete()
-    current_date = dumps(today_date, default=json_util.default)
+    current_date = today_date
     endpoint = f"{BASE_URL}/fetch_and_add_rest"
 
     response = requests.get(endpoint)
