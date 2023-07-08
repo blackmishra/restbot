@@ -156,6 +156,10 @@
           {% endif %}
           {% if user_details %}
           <small class="form-text text-muted">Your Resy Account details will be fetched from account.</small><br><br>
+              {% if booking_details.booking_id %}
+              <input type='submit' class='btn btn-finish btn-fill btn-danger btn-wd' name='complete' value='Complete Booking' />
+              {% endif %}
+            
           {% else %}
             <small class="form-text text-muted">Complete your request by providing your Resy Account details.</small>
             <div class="form-group mt-3">
