@@ -148,7 +148,7 @@ class RestTemplateView(APIView):
                 config_details.append(slot_details)
 
             rest_details["config_details"] = config_details
-            print(rest_details)
+
         else:
             status = "400"
 
@@ -292,7 +292,6 @@ class Make_Booking(APIView):
         auth_token = request.data.get("auth_token")
         url = CONST.BOOKING_API
         payload = f"book_token={booking_token}&source_id=resy.com-venue-details"
-        print(payload)
 
         # add replace = 1 in payload to update booking slot
         headers = default_headers
@@ -437,7 +436,6 @@ class Cancel_Booking(APIView):
 class Fetch_user(APIView):
     def get(self, request, *args, **kwargs):
         user_queryset = None
-        print(request.session.get("user"))
         if request.session.get("user"):
             user_email = request.session.get("user")["userinfo"]["email"]
             user_queryset = User.objects.filter(user_email=user_email).values(
@@ -462,7 +460,6 @@ class Fetch_user(APIView):
         )
 
     def post(self, request, *args, **kwargs):
-        print(request.session.get("user_details"))
         if request.session.get("user_details") is None:
             data = {
                 "resy_email": request.data.get("resy_email"),
@@ -470,7 +467,6 @@ class Fetch_user(APIView):
                 "user_name": request.data.get("resy_email"),
                 "user_email": request.data.get("resy_email"),
             }
-            print(data)
             serializer = UserSerializer(data=data)
 
             if serializer.is_valid():
