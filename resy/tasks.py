@@ -106,6 +106,7 @@ def make_booking_req():
     book_reqs = Reservation_request.objects.filter(
         booking_status="Pending", is_booking_date_active=True
     )
+    user_objs = User.objects.all()
 
     for req in book_reqs:
         rest_id = int(req.rest_id)
@@ -113,7 +114,8 @@ def make_booking_req():
 
         payload = {"booking_date": req.date, "rest_id": rest_id}
         response = requests.get(endpoint, data=payload)
-        auth_token = req.user_token
+        usr = user_objs.filter(user_email= req.user_email)
+        auth_token = usr.user_token
         data = response.json()
 
         # Get Booking Token and try making a reservation.
