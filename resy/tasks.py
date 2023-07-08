@@ -18,6 +18,25 @@ from bson import json_util
 
 logger = get_task_logger(__name__)
 today_date = date.today()
+default_headers = {
+    "authority": "api.resy.com",
+    "accept": "application/json, text/plain, */*",
+    "accept-language": "en-GB,en;q=0.9",
+    "authorization": 'ResyAPI api_key="VbWk7s3L4KiK5fzlO7JD3Q5EYolJI7n5"',
+    "cache-control": "no-cache",
+    "origin": "https://resy.com",
+    "referer": "https://resy.com/",
+    "sec-fetch-dest": "empty",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-site": "same-site",
+    "sec-gpc": "1",
+    "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
+    "x-origin": "https://resy.com",
+    "sec-ch-ua": '"Brave";v="111", "Not(A:Brand";v="8", "Chromium";v="111"',
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": '"Linux"',
+    "content-type": "application/json",
+}
 
 
 @shared_task
@@ -37,7 +56,7 @@ def update_is_booking_date_flag():
             "query": "",
         }
     )
-    headers = ast.literal_eval(settings.RESY_HEADERS)
+    headers = default_headers
     response = requests.post(url, headers=headers, data=payload)
     data = response.json()
 
