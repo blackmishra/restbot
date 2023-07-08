@@ -16,9 +16,8 @@ from json import dumps
 from django.core.serializers.json import DjangoJSONEncoder
 
 
-
 logger = get_task_logger(__name__)
-today_date = json.dumps(date.today(), cls=DjangoJSONEncoder)
+today_date = date.today()
 
 default_headers = {
     "authority": "api.resy.com",
@@ -44,7 +43,6 @@ default_headers = {
 @shared_task
 def update_is_booking_date_flag():
     book_reqs = Reservation_request.objects.all()
-
     current_date = today_date
 
     url = CONST.SEARCH_API
@@ -54,13 +52,21 @@ def update_is_booking_date_flag():
             "per_page": 5000,
             "slot_filter": {"day": current_date, "party_size": 2},
             "types": ["venue"],
-            "geo": {"latitude": 40.712941, "longitude": -74.006393, "radius": 35420},
+            "geo": {
+                "latitude": 40.712941,
+                "longitude": -74.006393,
+                "radius": 35420,
+            },
             "query": "",
-        }
+        },
+        cls=DjangoJSONEncoder,
     )
     headers = default_headers
+
     response = requests.post(url, headers=headers, data=payload)
     data = response.json()
+    print(response)
+    print(data)
 
     # All values
     values = {}
@@ -77,11 +83,13 @@ def update_is_booking_date_flag():
     for req in book_reqs:
         # booking_date = getattr(req, 'date')
         rest_id = getattr(req, "rest_id")
-        logger.info(rest_id)
+        # logger.info(rest_id)
 
         date_str = values[rest_id]["availability_dates"][-1][-1]
 
-        req.booking_available_till = datetime.date(*map(int, date_str.split("-")))
+        # req.booking_available_till = datetime.date(*map(int, date_str.split("-")))
+        req.booking_available_till = datetime.strptime(date_str, "%Y-%m-%d").date()
+
         req.save()
 
         if req.is_booking_date_available:
@@ -90,7 +98,6 @@ def update_is_booking_date_flag():
         else:
             req.is_booking_date_active = False
             req.save()
-
         # if req.remove_booking_req:
         #     req.delete()
 
@@ -158,7 +165,6 @@ def make_booking_req():
 @shared_task
 def update_restaurants():
     Restaurant.objects.all().delete()
-    current_date = today_date
     endpoint = f"{BASE_URL}/fetch_and_add_rest"
 
     response = requests.get(endpoint)

@@ -20,6 +20,8 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.serializers.json import DjangoJSONEncoder
+
 
 from resybookingproject import constants as CONST
 
@@ -540,7 +542,4 @@ class BookingListView(ListView):
 
 class TestAPI(APIView):
     def get(self, request, *args, **kwargs):
-        
-        print(data)
-        print(type(data))
-        return Response("All seems good.", status=status.HTTP_200_OK)
+        return Response("All good.", status=status.HTTP_200_OK)
