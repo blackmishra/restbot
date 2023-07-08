@@ -65,8 +65,6 @@ def update_is_booking_date_flag():
 
     response = requests.post(url, headers=headers, data=payload)
     data = response.json()
-    print(response)
-    print(data)
 
     # All values
     values = {}
@@ -133,16 +131,13 @@ def make_booking_req():
                 response = requests.post(url, data=payload)
                 data = response.json()
                 booking_token = data.get("data")
-                logger.info(booking_token)
 
                 # Making a reservation
                 url = f"{BASE_URL}/make_booking"
                 payload = {"booking_token": booking_token, "auth_token": auth_token}
                 response = requests.post(url, data=payload)
-                logger.info(response)
                 logger.info(response.status_code)
                 data = response.json()
-                logger.info(data)
                 if response.status_code == 201:
                     booking_status = True
                     req.booking_status = "Confirmed"
