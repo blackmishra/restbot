@@ -32,6 +32,25 @@ from .serializers import (
 )
 
 today_date = date.today()
+default_headers = {
+    "authority": "api.resy.com",
+    "accept": "application/json, text/plain, */*",
+    "accept-language": "en-GB,en;q=0.9",
+    "authorization": 'ResyAPI api_key="VbWk7s3L4KiK5fzlO7JD3Q5EYolJI7n5"',
+    "cache-control": "no-cache",
+    "origin": "https://resy.com",
+    "referer": "https://resy.com/",
+    "sec-fetch-dest": "empty",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-site": "same-site",
+    "sec-gpc": "1",
+    "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
+    "x-origin": "https://resy.com",
+    "sec-ch-ua": '"Brave";v="111", "Not(A:Brand";v="8", "Chromium";v="111"',
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": '"Linux"',
+    "content-type": "application/json",
+}
 
 
 def send_email(subject, message, to_email=CONST.DEFAULT_RECEPIENT):
@@ -64,9 +83,9 @@ class SearchTemplateView(TemplateView):
                 "query": "",
             }
         )
-        headers = ast.literal_eval(settings.RESY_HEADERS)
-
+        headers = default_headers
         response = requests.post(url, headers=headers, data=payload)
+        print(response)
         data = response.json()
 
         # All values
@@ -101,9 +120,9 @@ class RestTemplateView(APIView):
         # Search specific restaurant details
         url = f"{CONST.FIND_REST_API}{current_date}&party_size=2&venue_id={rest_id}"
         payload = {}
-        headers = ast.literal_eval(settings.RESY_HEADERS)
-
+        headers = default_headers
         response = requests.request("GET", url, headers=headers, data=payload)
+        print(response)
         data = response.json()
         rest_details = {}
         rest_details["date"] = current_date
@@ -220,8 +239,7 @@ class Populate_Restaurants(APIView):
                 "query": "",
             }
         )
-        headers = ast.literal_eval(settings.RESY_HEADERS)
-
+        headers = default_headers
         response = requests.post(url, headers=headers, data=payload)
         print(response.status_code)
         data = response.json()
@@ -249,7 +267,6 @@ class Get_Booking_Token(APIView):
         config_token = request.data.get("config_token")
         booking_date = request.data.get("booking_date")
         party_size = request.data.get("party_size")
-
         url = CONST.DETAILS_API
         payload = json.dumps(
             {
@@ -259,13 +276,9 @@ class Get_Booking_Token(APIView):
                 "party_size": party_size,
             }
         )
-
-        print(payload)
-        headers = ast.literal_eval(settings.RESY_HEADERS)
-
+        headers = default_headers
         response = requests.request("POST", url, headers=headers, data=payload)
         data = response.json()
-        print(data)
         booking_token = data["book_token"]["value"]
 
         return Response({"data": booking_token})
@@ -277,18 +290,17 @@ class Make_Booking(APIView):
         auth_token = request.data.get("auth_token")
         url = CONST.BOOKING_API
         payload = f"book_token={booking_token}&source_id=resy.com-venue-details"
+        print(payload)
 
         # add replace = 1 in payload to update booking slot
-        headers = ast.literal_eval(settings.RESY_HEADERS)
-
+        headers = default_headers
+        headers["content-type"] = "application/x-www-form-urlencoded"
         headers["x-resy-auth-token"] = auth_token
         headers["x-resy-universal-auth"] = auth_token
         try:
             response = requests.request("POST", url, headers=headers, data=payload)
-            print(response)
-            print(response.status_code)
             data = response.json()
-            print(data)
+
         except Exception as e:
             return Response(
                 "Booking Request Failed to create. " + str(e),
@@ -308,9 +320,7 @@ class Add_Restaurant(APIView):
 
     def post(self, request, *args, **kwargs):
         rest_name = request.data.get("rest_name")
-        print(rest_name)
         current_date = str(today_date)
-
         url = CONST.SEARCH_API
 
         payload = json.dumps(
@@ -323,13 +333,13 @@ class Add_Restaurant(APIView):
                 "types": ["venue", "cuisine"],
             }
         )
-        headers = ast.literal_eval(settings.RESY_HEADERS)
-
+        headers = default_headers
         response = requests.request("POST", url, headers=headers, data=payload)
-
         data = response.json()
-        records = data["search"]["hits"][0]
+
+        records = data["search"]["hits"]
         if records:
+            records = records[0]
             obj_id = records["objectID"]
             try:
                 Restaurant.objects.get(rest_id=obj_id)
@@ -373,10 +383,10 @@ class User_auth_token(APIView):
         user_email = request.data.get("resy_email")
         user_pwd = request.data.get("resy_pwd")
         payload = f"email={user_email}&password={user_pwd}"
-        headers = ast.literal_eval(settings.RESY_HEADERS)
+        headers = default_headers
+        headers["content-type"] = "application/x-www-form-urlencoded"
 
         response = requests.request("POST", url, headers=headers, data=payload)
-        print(response)
         data = response.json()
 
         user_token = data["token"]
@@ -393,10 +403,9 @@ class Cancel_Booking(APIView):
         return render(request, "cancel_booking.html", self.context)
 
     def post(self, request, *args, **kwargs):
-        headers = ast.literal_eval(settings.RESY_HEADERS)
+        headers = default_headers
         resy_url = CONST.CANCEL_API
         booking_id = request.data.get("booking_id")
-        print(booking_id)
         req = Reservation_request.objects.get(booking_id=booking_id)
         auth_token = req.user_token
         reservation_cnf_token = req.reservation_cnf_token
