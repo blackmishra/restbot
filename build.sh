@@ -13,7 +13,7 @@ pip install yagmail
 pip install python-dotenv
 pip install poetry==1.2.0
 pip install authlib
-# pip install bson
+pip install pymongo
 rm poetry.lock
 
 poetry lock
