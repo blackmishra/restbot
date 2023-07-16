@@ -46,7 +46,7 @@ default_headers = {
     "sec-fetch-mode": "cors",
     "sec-fetch-site": "same-site",
     "sec-gpc": "1",
-    "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
+    "user-agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:15.0) Gecko/20100101 Firefox/15.0.1",
     "x-origin": "https://resy.com",
     "sec-ch-ua": '"Brave";v="111", "Not(A:Brand";v="8", "Chromium";v="111"',
     "sec-ch-ua-mobile": "?0",
@@ -85,7 +85,22 @@ class SearchTemplateView(TemplateView):
                 "query": "",
             }
         )
-        headers = default_headers
+        headers = {
+            "authority": "api.resy.com",
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-GB,en;q=0.8",
+            "authorization": 'ResyAPI api_key="VbWk7s3L4KiK5fzlO7JD3Q5EYolJI7n5"',
+            "cache-control": "no-cache",
+            "content-type": "application/json",
+            "origin": "https://resy.com",
+            "referer": "https://resy.com/",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-site",
+            "sec-gpc": "1",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36",
+            "x-origin": "https://resy.com",
+        }
         response = requests.post(url, headers=headers, data=payload)
         print(response)
         data = response.json()
