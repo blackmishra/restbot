@@ -137,7 +137,21 @@ class RestTemplateView(APIView):
         # Search specific restaurant details
         url = f"{CONST.FIND_REST_API}{current_date}&party_size=2&venue_id={rest_id}"
         payload = {}
-        headers = default_headers
+        headers = {
+            "authority": "api.resy.com",
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-GB,en;q=0.8",
+            "authorization": 'ResyAPI api_key="VbWk7s3L4KiK5fzlO7JD3Q5EYolJI7n5"',
+            "cache-control": "no-cache",
+            "origin": "https://resy.com",
+            "referer": "https://resy.com/",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-site",
+            "sec-gpc": "1",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36",
+            "x-origin": "https://resy.com",
+        }
         response = requests.request("GET", url, headers=headers, data=payload)
         print(response)
         data = response.json()
@@ -256,7 +270,22 @@ class Populate_Restaurants(APIView):
                 "query": "",
             }
         )
-        headers = default_headers
+        headers = {
+            "authority": "api.resy.com",
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-GB,en;q=0.8",
+            "authorization": 'ResyAPI api_key="VbWk7s3L4KiK5fzlO7JD3Q5EYolJI7n5"',
+            "cache-control": "no-cache",
+            "content-type": "application/json",
+            "origin": "https://resy.com",
+            "referer": "https://resy.com/",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-site",
+            "sec-gpc": "1",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36",
+            "x-origin": "https://resy.com",
+        }
         response = requests.post(url, headers=headers, data=payload)
         print(response.status_code)
         data = response.json()
@@ -293,7 +322,22 @@ class Get_Booking_Token(APIView):
                 "party_size": party_size,
             }
         )
-        headers = default_headers
+        headers = {
+            "authority": "api.resy.com",
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-GB,en;q=0.8",
+            "authorization": 'ResyAPI api_key="VbWk7s3L4KiK5fzlO7JD3Q5EYolJI7n5"',
+            "cache-control": "no-cache",
+            "content-type": "application/json",
+            "origin": "https://widgets.resy.com",
+            "referer": "https://widgets.resy.com/",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-site",
+            "sec-gpc": "1",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36",
+            "x-origin": "https://widgets.resy.com",
+        }
         response = requests.request("POST", url, headers=headers, data=payload)
         data = response.json()
         booking_token = data["book_token"]["value"]
@@ -309,7 +353,23 @@ class Make_Booking(APIView):
         payload = f"book_token={booking_token}&source_id=resy.com-venue-details"
 
         # add replace = 1 in payload to update booking slot
-        headers = default_headers
+        headers = {
+            "authority": "api.resy.com",
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-GB,en;q=0.8",
+            "authorization": 'ResyAPI api_key="VbWk7s3L4KiK5fzlO7JD3Q5EYolJI7n5"',
+            "cache-control": "no-cache",
+            "content-type": "application/x-www-form-urlencoded",
+            "origin": "https://widgets.resy.com",
+            "referer": "https://widgets.resy.com/",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-site",
+            "sec-gpc": "1",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
+            "x-origin": "https://widgets.resy.com",
+        }
+
         headers["content-type"] = "application/x-www-form-urlencoded"
         headers["x-resy-auth-token"] = auth_token
         headers["x-resy-universal-auth"] = auth_token
@@ -349,7 +409,21 @@ class Add_Restaurant(APIView):
                 "types": ["venue", "cuisine"],
             }
         )
-        headers = default_headers
+        headers = {
+            "authority": "api.resy.com",
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-GB,en;q=0.8",
+            "authorization": 'ResyAPI api_key="VbWk7s3L4KiK5fzlO7JD3Q5EYolJI7n5"',
+            "cache-control": "no-cache",
+            "origin": "https://resy.com",
+            "referer": "https://resy.com/",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-site",
+            "sec-gpc": "1",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36",
+            "x-origin": "https://resy.com",
+        }
         response = requests.request("POST", url, headers=headers, data=payload)
         data = response.json()
 
@@ -399,8 +473,26 @@ class User_auth_token(APIView):
         user_email = request.data.get("resy_email")
         user_pwd = request.data.get("resy_pwd")
         payload = f"email={user_email}&password={user_pwd}"
-        headers = default_headers
-        headers["content-type"] = "application/x-www-form-urlencoded"
+        headers = {
+            "authority": "api.resy.com",
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-GB,en;q=0.9",
+            "authorization": 'ResyAPI api_key="VbWk7s3L4KiK5fzlO7JD3Q5EYolJI7n5"',
+            "cache-control": "no-cache",
+            "content-type": "application/x-www-form-urlencoded",
+            "origin": "https://resy.com",
+            "referer": "https://resy.com/",
+            "sec-ch-ua": '"Brave";v="111", "Not(A:Brand";v="8", "Chromium";v="111"',
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": '"Linux"',
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-site",
+            "sec-gpc": "1",
+            "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
+            "x-origin": "https://resy.com",
+        }
+        # headers["content-type"] = "application/x-www-form-urlencoded"
 
         response = requests.request("POST", url, headers=headers, data=payload)
         data = response.json()
@@ -419,7 +511,25 @@ class Cancel_Booking(APIView):
         return render(request, "cancel_booking.html", self.context)
 
     def post(self, request, *args, **kwargs):
-        headers = default_headers
+        headers = {
+            "authority": "api.resy.com",
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-GB,en;q=0.5",
+            "authorization": 'ResyAPI api_key="VbWk7s3L4KiK5fzlO7JD3Q5EYolJI7n5"',
+            "cache-control": "no-cache",
+            "content-type": "application/x-www-form-urlencoded",
+            "origin": "https://widgets.resy.com",
+            "referer": "https://widgets.resy.com/",
+            "sec-ch-ua": '"Brave";v="113", "Chromium";v="113", "Not-A.Brand";v="24"',
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": '"macOS"',
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-site",
+            "sec-gpc": "1",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36",
+            "x-origin": "https://widgets.resy.com",
+        }
         resy_url = CONST.CANCEL_API
         booking_id = request.data.get("booking_id")
         req = Reservation_request.objects.get(booking_id=booking_id)
