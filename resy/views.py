@@ -61,14 +61,14 @@ def send_email(subject, message, to_email=CONST.DEFAULT_RECEPIENT):
     user.send(to=to_email, subject=subject, contents=message)
 
 
-class SearchTemplateView(TemplateView):
-    template_name = "index.html"
-    context = {}
+class SearchTemplateView(APIView):
+    # template_name = "index.html"
 
-    def get_context_data(self, *args, **kwargs):
+    def get(self, *args, **kwargs):
         """
         List all available restaurants.
         """
+        context = {}
         url = CONST.SEARCH_API
         payload = json.dumps(
             {
@@ -124,8 +124,8 @@ class SearchTemplateView(TemplateView):
             values.append(temp)
 
         values = sorted(values, key=lambda d: d["name"])
-        self.context["data"] = values
-        return self.context
+        context["data"] = values
+        return Response(context, status=response.status_code) 
 
 
 class RestTemplateView(APIView):
