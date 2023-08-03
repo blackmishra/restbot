@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "users",
     "django_celery_beat",
     "celery",
+    "corsheaders",
 ]
 
 
@@ -74,9 +75,17 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES':[
+        "rest_framework.permissions.AllowAny",
+    ]
+}
+
 ROOT_URLCONF = "resybookingproject.urls"
+CORS_ORIGIN_ALLOW_ALL = True
 
 TEMPLATES = [
     {

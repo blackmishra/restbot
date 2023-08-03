@@ -125,14 +125,14 @@ class SearchTemplateView(APIView):
 
         values = sorted(values, key=lambda d: d["name"])
         context["data"] = values
-        return Response(context, status=response.status_code) 
+        return Response(context, status=response.status_code)
 
 
 class RestTemplateView(APIView):
     context = {}
 
-    def get(self, request, *args, **kwargs):
-        rest_id = request.data.get("rest_id") or None
+    def get(self, request, id=None, *args, **kwargs):
+        rest_id = id
         current_date = request.data.get("booking_date") or today_date
         # Search specific restaurant details
         url = f"{CONST.FIND_REST_API}{current_date}&party_size=2&venue_id={rest_id}"
@@ -159,10 +159,17 @@ class RestTemplateView(APIView):
         rest_details["date"] = current_date
         rest_details["venue_id"] = rest_id
 
-        if data["results"]["venues"]:
+
+        if data.get("results") and data["results"].get("venues"):
+
             item = data["results"]["venues"][0]
             rest_details["name"] = item["venue"]["name"]
-            status = "200"
+            image = list(item["venue"]['responsive_images']['originals'].values())[0]['url']
+            ratings = item["venue"]["rating"]
+            # description = item["venue"]['content']['en-us']['about']['body']
+            # description = data.get('about')
+            # print(ratings)
+            status = 200
             slots = item["slots"]
             config_details = []
             for item in slots:
@@ -177,20 +184,24 @@ class RestTemplateView(APIView):
                 config_details.append(slot_details)
 
             rest_details["config_details"] = config_details
+            rest_details["image"] = image
+            rest_details["ratings"] = ratings
 
         else:
-            status = "400"
+            status = 400
 
         rest_details["status"] = status
         self.context["data"] = rest_details
-        return Response(self.context)
+        return Response(self.context, status=status)
 
 
 class Request_booking(APIView):
     def get(self, request, *args, **kwargs):
         rest_objs = list(Restaurant.objects.all().order_by("rest_name").values())
         context = {"data": rest_objs}
-        return render(request, "booking.html", context)
+        # return render(request, "booking.html", context)
+        return Response(context=context, status=status.HTTP_200_OK)
+    
 
     def post(self, request, *args, **kwargs):
         """
@@ -240,13 +251,14 @@ class Request_booking(APIView):
         context[
             "message"
         ] = "BAD INPUT. Booking Request: Failed to create. Please try again with valid input."
+        return Response(context=context, status=status.HTTP_400_BAD_REQUEST)
 
-        return render(
-            request,
-            context=context,
-            status=status.HTTP_400_BAD_REQUEST,
-            template_name="status.html",
-        )
+        # return render(
+        #     request,
+        #     context=context,
+        #     status=status.HTTP_400_BAD_REQUEST,
+        #     template_name="status.html",
+        # )
 
 
 class Populate_Restaurants(APIView):
@@ -342,7 +354,7 @@ class Get_Booking_Token(APIView):
         data = response.json()
         booking_token = data["book_token"]["value"]
 
-        return Response({"data": booking_token})
+        return Response(context = {"data": booking_token}, status=status.HTTP_200_OK)
 
 
 class Make_Booking(APIView):

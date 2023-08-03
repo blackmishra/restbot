@@ -110,7 +110,7 @@ def make_booking_req():
 
     for req in book_reqs:
         rest_id = int(req.rest_id)
-        endpoint = f"{BASE_URL}/find"
+        endpoint = f"{BASE_URL}/restaurants/{rest_id}/"
 
         payload = {"booking_date": req.date, "rest_id": rest_id}
         response = requests.get(endpoint, data=payload)

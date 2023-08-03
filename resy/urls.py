@@ -17,7 +17,8 @@ from .views import (
 
 urlpatterns = [
     path('search', SearchTemplateView.as_view()),
-    path('find', RestTemplateView.as_view()),
+    # path('restaurants/', RestTemplateView.as_view()),
+    path('restaurants/<int:id>', RestTemplateView.as_view()),
     path('', Request_booking.as_view(), name = "booking_page"),
     path('fetch_and_add_rest', Populate_Restaurants.as_view()),
     path('get_booking_token', Get_Booking_Token.as_view()),
