@@ -20,6 +20,15 @@ class RestaurantSerializer(serializers.ModelSerializer):
 
 
 class BookingSerializer(serializers.ModelSerializer):
+    # from_time = serializers.DateTimeField(
+    #     required=False,
+    #     input_formats=["%Y-%m-%dT%H:%M:%SZ", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d", "%H:%M:%S"],
+    # )
+    # to_time = serializers.DateTimeField(
+    #     required=False,
+    #     input_formats=["%Y-%m-%dT%H:%M:%SZ", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d"],
+    # )
+
     class Meta:
         model = Reservation_request
         fields = "__all__"

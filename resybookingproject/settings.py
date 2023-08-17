@@ -35,7 +35,7 @@ if RENDER_EXTERNAL_HOSTNAME:
 
 # set the celery broker url
 CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL")
-LOGIN_URL = 'login'
+LOGIN_URL = "login"
 
 # set the celery result backend
 CELERY_RESULT_BACKEND = os.environ.get("CELERY_BROKER_URL")
@@ -45,8 +45,8 @@ CELERY_RESULT_SERIALIZER = "json"
 CELERY_TASK_SERIALIZER = "json"
 
 # set the celery timezone
-CELERY_TIMEZONE = "UTC"
-
+CELERY_TIMEZONE = "America/New_York"
+TIME_ZONE = "America/New_York"
 
 # Application definition
 
@@ -62,8 +62,8 @@ INSTALLED_APPS = [
     "users",
     "django_celery_beat",
     "celery",
+    "corsheaders",
 ]
-
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -74,8 +74,16 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
 ]
 
+REST_FRAMEWORK = {
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.AllowAny",
+    ]
+}
+
+CORS_ORIGIN_ALLOW_ALL = True
 ROOT_URLCONF = "resybookingproject.urls"
 
 TEMPLATES = [

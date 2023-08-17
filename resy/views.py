@@ -4,7 +4,7 @@ import json
 import uuid
 from datetime import date, datetime
 from typing import Any
-
+import re
 import requests
 import yagmail
 from django.conf import settings
@@ -61,14 +61,15 @@ def send_email(subject, message, to_email=CONST.DEFAULT_RECEPIENT):
     user.send(to=to_email, subject=subject, contents=message)
 
 
-class SearchTemplateView(TemplateView):
-    template_name = "index.html"
-    context = {}
+class SearchTemplateView(APIView):
+    # template_name = "index.html"
+    # context = {}
 
-    def get_context_data(self, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         """
         List all available restaurants.
         """
+        context = {}
         url = CONST.SEARCH_API
         payload = json.dumps(
             {
@@ -124,8 +125,9 @@ class SearchTemplateView(TemplateView):
             values.append(temp)
 
         values = sorted(values, key=lambda d: d["name"])
-        self.context["data"] = values
-        return self.context
+        context["data"] = values
+        # return context
+        return Response(context, status=status.HTTP_200_OK)
 
 
 class RestTemplateView(APIView):
@@ -188,24 +190,51 @@ class RestTemplateView(APIView):
 
 class Request_booking(APIView):
     def get(self, request, *args, **kwargs):
-        rest_objs = list(Restaurant.objects.all().order_by("rest_name").values())
+        rest_objs = list(
+            Restaurant.objects.all()
+            .order_by("rest_name")
+            .values("rest_name", "rest_id")
+        )
         context = {"data": rest_objs}
-        return render(request, "booking.html", context)
+        # return render(request, "booking.html", context)
+        return Response(context, status=status.HTTP_200_OK)
+
+    def format_dateTime(self, obj_type, obj):
+        if obj_type == "Date":
+            obj = obj.split("T")[0]
+            obj = datetime.strptime(obj, "%Y-%m-%d").date()
+        else:
+            result = re.search("T(.*)Z", obj)
+            if result:
+                obj = result.group(1)
+                obj = obj.split(".")[0]
+            obj = datetime.strptime(obj, "%H:%M:%S").time()
+        return obj
 
     def post(self, request, *args, **kwargs):
         """
         Create the reservation request with given data
         """
         rest_name, rest_id = request.data.get("rest_name").split(",")
+
+        rervation_date = request.data.get("date_picker")
+        rervation_date = self.format_dateTime("Date", rervation_date)
+
+        from_time = request.data.get("time_slot")[0]
+        from_time = self.format_dateTime("Time", from_time)
+
+        to_time = request.data.get("time_slot")[1]
+        to_time = self.format_dateTime("Time", to_time)
+
         booking_id = str(uuid.uuid1())
         data = {
             "rest_name": rest_name,
-            "rest_id": rest_id,
-            "date": request.data.get("date_picker"),
+            "rest_id": int(rest_id),
+            "date": rervation_date,
             "number_of_guests": request.data.get("guests_size"),
             "booking_available_till": today_date,
-            "from_time": request.data.get("from_time"),
-            "to_time": request.data.get("to_time"),
+            "from_time": from_time,
+            "to_time": to_time,
             "booking_id": booking_id,
         }
 
@@ -229,24 +258,29 @@ class Request_booking(APIView):
             context["result"] = serializer.data
             context["message"] = message
             request.session["booking_details"] = booking_details
-            return redirect("fetch_user")
+            return Response("Booking created", status=status.HTTP_201_CREATED)
+
+            # return redirect("fetch_user")
             # return render(
             #     request,
             #     context=context,
             #     status=status.HTTP_201_CREATED,
             #     template_name="user_page.html",
             # )
+
         context["result"] = serializer.errors
         context[
             "message"
         ] = "BAD INPUT. Booking Request: Failed to create. Please try again with valid input."
 
-        return render(
-            request,
-            context=context,
-            status=status.HTTP_400_BAD_REQUEST,
-            template_name="status.html",
-        )
+        # return render(
+        #     request,
+        #     context=context,
+        #     status=status.HTTP_400_BAD_REQUEST,
+        #     template_name="status.html",
+        # )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class Populate_Restaurants(APIView):
