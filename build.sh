@@ -8,6 +8,7 @@ pip install --upgrade pip
 pip install celery
 pip install djangorestframework
 pip install django-celery-beat
+pip install django-cors-headers
 # pip install redis
 pip install yagmail
 pip install python-dotenv
