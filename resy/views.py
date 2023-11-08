@@ -2,7 +2,7 @@ import ast
 import datetime
 import json
 import uuid
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from typing import Any
 import re
 import requests
@@ -34,6 +34,7 @@ from .serializers import (
 )
 
 today_date = date.today()
+tomorrow_date = date.today() + timedelta(days=1)
 default_headers = {
     "authority": "api.resy.com",
     "accept": "application/json, text/plain, */*",
@@ -110,8 +111,8 @@ class SearchTemplateView(APIView):
         values = []
         for item in data["search"]["hits"]:
             temp = {}
-            temp["name"] = (item["name"],)
-            temp["id"] = (item["id"]["resy"],)
+            temp["name"] = item["name"]
+            temp["id"] = item["id"]["resy"]
             temp["rating"] = (round(item["rating"]["average"], 2),)
             temp["image"] = (
                 item["images"][0] if item["images"] else CONST.IMG_NOT_AVAIALABLE_ICON
@@ -127,15 +128,18 @@ class SearchTemplateView(APIView):
         values = sorted(values, key=lambda d: d["name"])
         context["data"] = values
         # return context
-        return Response(context, status=status.HTTP_200_OK)
+        return Response(values, status=status.HTTP_200_OK)
 
 
 class RestTemplateView(APIView):
     context = {}
 
     def get(self, request, *args, **kwargs):
-        rest_id = request.data.get("rest_id") or None
-        current_date = request.data.get("booking_date") or today_date
+        # rest_id = request.data.get("rest_id") or None
+        # current_date = request.data.get("booking_date") or today_date
+        rest_id = self.kwargs.get("rest_id") or None
+        # print(rest_id)
+        current_date = self.kwargs.get("booking_date") or tomorrow_date
         # Search specific restaurant details
         url = f"{CONST.FIND_REST_API}{current_date}&party_size=2&venue_id={rest_id}"
         payload = {}
@@ -155,15 +159,20 @@ class RestTemplateView(APIView):
             "x-origin": "https://resy.com",
         }
         response = requests.request("GET", url, headers=headers, data=payload)
-        print(response)
         data = response.json()
+        # print(data)
+
         rest_details = {}
         rest_details["date"] = current_date
         rest_details["venue_id"] = rest_id
 
         if data["results"]["venues"]:
             item = data["results"]["venues"][0]
+            template_details = next(iter(item.get("templates").values()))
+            rest_details["images_list"] = template_details.get("images")
             rest_details["name"] = item["venue"]["name"]
+            rest_details["rating"] = round(item["venue"]["rating"], 1)
+
             status = "200"
             slots = item["slots"]
             config_details = []
@@ -185,7 +194,9 @@ class RestTemplateView(APIView):
 
         rest_details["status"] = status
         self.context["data"] = rest_details
-        return Response(self.context)
+        # print(data)
+        # return Response(self.context)
+        return Response(rest_details, status=status)
 
 
 class Request_booking(APIView):
