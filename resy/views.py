@@ -25,7 +25,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 
 from resybookingproject import constants as CONST
 
-from .models import Reservation_request, Restaurant, Resy, User
+from .models import Reservation_request, Restaurant, Resy, User, Restaurant_details
 from .serializers import (
     BookingSerializer,
     RestaurantSerializer,
@@ -709,3 +709,107 @@ class BookingListView(ListView):
 class TestAPI(APIView):
     def get(self, request, *args, **kwargs):
         return Response("All good.", status=status.HTTP_200_OK)
+
+
+class RestaurantDetails(APIView):
+    def get(self, request, *args, **kwargs):
+        rest_objs = list(
+            Restaurant_details.objects.all()
+            .order_by("rest_name")
+            .values("rest_name", "rest_id", "rating", "location", "image")
+        )
+        # print(rest_objs[0])
+        for item in rest_objs:
+            item['name'] = [item['rest_name']]
+        # print(rest_objs[:2])
+
+        context = {"data": rest_objs}
+
+        # return render(request, "booking.html", context)
+        return Response(rest_objs, status=status.HTTP_200_OK)
+
+
+class Populate_Restaurants_Details(APIView):
+    def get(self, request, *args, **kwargs):
+        current_date = str(today_date)
+        # print(str(current_date))
+        # print(current_date.strftime('%Y-%m-%d'))
+        url = CONST.SEARCH_API
+        payload = json.dumps(
+            {
+                "availability": True,
+                "page": 1,
+                "per_page": 5000,
+                "slot_filter": {"day": current_date, "party_size": 2},
+                "types": ["venue"],
+                "geo": {
+                    "latitude": 40.712941,
+                    "longitude": -74.006393,
+                    "radius": 35420,
+                },
+                "query": "",
+            }
+        )
+        headers = {
+            "authority": "api.resy.com",
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-GB,en;q=0.8",
+            "authorization": 'ResyAPI api_key="VbWk7s3L4KiK5fzlO7JD3Q5EYolJI7n5"',
+            "cache-control": "no-cache",
+            "content-type": "application/json",
+            "origin": "https://resy.com",
+            "referer": "https://resy.com/",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-site",
+            "sec-gpc": "1",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36",
+            "x-origin": "https://resy.com",
+        }
+        response = requests.post(url, headers=headers, data=payload)
+        print(response.status_code)
+        data = response.json()
+        print("Zero level")
+        # All values
+        validated_data = []
+        try:
+            for item in data["search"]["hits"]:
+                validated_data.append(
+                    [
+                        item["name"],
+                        item["id"]["resy"],
+                        round(item["rating"]["average"], 2),
+                        item["region"],
+                        next(iter(item["images"] or []), CONST.IMG_NOT_AVAIALABLE_ICON)
+                    ]
+                )
+            print("First pass")
+            rest_data = [
+                Restaurant_details(
+                    rest_name=item[0],
+                    rest_id=item[1],
+                    image=item[4],
+                    location=item[3],
+                    rating=item[2],
+                    # description=item[5],
+                )
+                for item in validated_data
+            ]
+            print("Second pass")
+
+            Restaurant_details.objects.bulk_create(rest_data)
+            print("Third pass")
+
+            return Response("All records inserted.", status=status.HTTP_201_CREATED)
+        except Exception as e:
+            print(
+                item["name"],
+                item["id"]["resy"],
+                item["rating"]["average"],
+                item["region"],
+                # item['content']['en-us']['about']['body'],
+                next(iter(item["images"] or []), None)
+            )
+            return Response(
+                "Insertion failed. " + str(e), status=status.HTTP_400_BAD_REQUEST
+            )

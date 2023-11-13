@@ -1,6 +1,8 @@
 from django.urls import path, include
 from .views import (
+    Populate_Restaurants_Details,
     RestTemplateView,
+    RestaurantDetails,
     SearchTemplateView,
     Request_booking,
     Populate_Restaurants,
@@ -28,5 +30,9 @@ urlpatterns = [
     path("fetch_user", Fetch_user.as_view(), name="fetch_user"),
     path("view_bookings", BookingListView.as_view(), name="view_bookings"),
     path("test_api", TestAPI.as_view(), name="test_api"),
+    path("home", RestaurantDetails.as_view(), name="home_page"),
+    path("fetch_and_add_rest_details", Populate_Restaurants_Details.as_view()),
+
+
     # path('save_in_session', Session_save.as_view(), name = "save_in_session"),
 ]
