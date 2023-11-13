@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from datetime import time
+from resybookingproject import constants as CONST
 
 
 class Resy(models.Model):
@@ -39,6 +40,28 @@ class Restaurant(models.Model):
     def __str__(self):
         return self.rest_name
 
+class Restaurant_images(models.Model):
+    rest_id = models.IntegerField(null=False, blank=False)
+    image_url = models.URLField(max_length=250)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.rest_id
+
+
+class Restaurant_details(models.Model):
+    rest_name = models.CharField(max_length=180, null=False, blank=False)
+    rest_id = models.IntegerField(primary_key=True, default=0)
+    rating = models.FloatField(null=True, blank=True)
+    location = models.CharField(max_length=180, null=False, blank=False)
+    description = models.TextField(default='Description not available')
+    image = models.URLField(null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.rest_name
 
 class Reservation_request(models.Model):
     user_email = models.ForeignKey(
