@@ -21,6 +21,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.serializers.json import DjangoJSONEncoder
+from dateutil import parser as date_parser
 
 
 from resybookingproject import constants as CONST
@@ -226,6 +227,7 @@ class Request_booking(APIView):
         """
         Create the reservation request with given data
         """
+        print('Request Booking is getting called')
         rest_name, rest_id = request.data.get("rest_name").split(",")
 
         rervation_date = request.data.get("date_picker")
@@ -813,3 +815,185 @@ class Populate_Restaurants_Details(APIView):
             return Response(
                 "Insertion failed. " + str(e), status=status.HTTP_400_BAD_REQUEST
             )
+
+
+class BookingRequest(APIView):
+    def get(self, request, *args, **kwargs):
+        rest_objs = list(
+            Restaurant.objects.all()
+            .order_by("rest_name")
+            .values("rest_name", "rest_id")
+        )
+        context = {"data": rest_objs}
+        # return render(request, "booking.html", context)
+        return Response(context, status=status.HTTP_200_OK)
+
+    def format_dateTime(self, obj_type, obj):
+        if obj_type == "Date":
+
+            obj = obj.split("GMT")[0].rstrip()
+            print(obj)
+            obj = datetime.strptime(obj, '%a %b %d %Y %H:%M:%S').date()
+        else:
+            result = re.search("T(.*)Z", obj)
+            if result:
+                obj = result.group(1)
+                obj = obj.split(".")[0]
+            obj = datetime.strptime(obj, "%H:%M").time()
+        return obj
+
+    def post(self, request, *args, **kwargs):
+        """
+        Create the reservation request with given data
+        """
+        print('Booking Request is getting called')
+
+        rest_name  = request.data.get("rest_name")
+        rest_id = request.data.get("rest_id")
+        reservation_date = request.data.get("reservation_date")
+        reservation_date = self.format_dateTime("Date", reservation_date)
+
+        from_time = request.data.get("time_slot")
+        # from_time = self.format_dateTime("Time", from_time)
+
+        # to_time = request.data.get("time_slot")[1]
+        # to_time = self.format_dateTime("Time", to_time)
+        to_time = from_time
+        print(rest_name, rest_id, reservation_date, from_time, to_time)
+
+
+        booking_id = str(uuid.uuid1())
+        data = {
+            "rest_name": rest_name,
+            "rest_id": int(rest_id),
+            "date": reservation_date,
+            "number_of_guests": request.data.get("guests_size"),
+            "booking_available_till": today_date,
+            "from_time": from_time,
+            "to_time": to_time,
+            "booking_id": booking_id,
+        }
+
+        serializer = BookingSerializer(data=data)
+        context = {}
+        print(data)
+        if serializer.is_valid():
+            serializer.save()
+
+            subject = "Booking Request: Successfully created."
+            message = f"{subject} \n\n Your Booking ID : {booking_id}. \n\n"
+            f"\nYou may receive another notification when your reservation is confirmed. "
+            f"This mail is just to inform you that we have received your booking request. "
+            f"It does not guarentee you will get the reservation."
+
+            booking_details = {
+                "booking_id": booking_id,
+                "subject": subject,
+                "message": message,
+            }
+            context["result"] = serializer.data
+            context["message"] = message
+            request.session["booking_details"] = booking_details
+            return Response("Booking created", status=status.HTTP_201_CREATED)
+
+            # return redirect("fetch_user")
+            # return render(
+            #     request,
+            #     context=context,
+            #     status=status.HTTP_201_CREATED,
+            #     template_name="user_page.html",
+            # )
+
+        context["result"] = serializer.errors
+        context[
+            "message"
+        ] = "BAD INPUT. Booking Request: Failed to create. Please try again with valid input."
+
+        # return render(
+        #     request,
+        #     context=context,
+        #     status=status.HTTP_400_BAD_REQUEST,
+        #     template_name="status.html",
+        # )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class Fetch_user_new(APIView):
+    def get(self, request, *args, **kwargs):
+        user_queryset = None
+        if request.data.get("user"):
+            user_email = request.session.get("user")["userinfo"]["email"]
+            user_queryset = User.objects.filter(user_email=user_email).values(
+                "resy_email", "resy_pwd", "user_name", "user_email"
+            )
+            if user_queryset:
+                request.session["user_details"] = (
+                    list(user_queryset)[0] if user_queryset else None
+                )
+
+        booking_details = request.session.get("booking_details")
+        usr_obj = list(user_queryset)[0] if user_queryset else None
+        if usr_obj:
+            return Response(usr_obj, status=status.HTTP_200_OK)
+        return Response(usr_obj, status=status.HTTP_401_UNAUTHORIZED)
+
+    def post(self, request, *args, **kwargs):
+        if request.session.get("user_details") is None:
+            data = {
+                "resy_email": request.data.get("resy_email"),
+                "resy_pwd": request.data.get("resy_pwd"),
+                "user_name": request.data.get("resy_email"),
+                "user_email": request.data.get("resy_email"),
+            }
+            serializer = UserSerializer(data=data)
+
+            if serializer.is_valid():
+                if User.objects.filter(user_email=data["user_email"]):
+                    message = "User already exists."
+                    req_status = status.HTTP_200_OK
+                else:
+                    serializer.save()
+                    message = "Resy Details saved successfully."
+                    req_status = status.HTTP_201_CREATED
+                    request.session["user_details"] = data
+                    if request.session.get("booking_details") is not None:
+                        booking_details = request.session.get("booking_details")
+                        Reservation_request.objects.filter(
+                            booking_id=booking_details["booking_id"]
+                        ).update(user_email=data["user_email"])
+
+                        # Send Email on successfull booking_request
+                        send_email(
+                            booking_details["subject"],
+                            booking_details["message"],
+                            data["user_email"],
+                        )
+            else:
+                message = serializer.errors
+                req_status = status.HTTP_400_BAD_REQUEST
+
+            return render(
+                request,
+                context={"message": message},
+                status=req_status,
+                template_name="status.html",
+            )
+        if request.session.get("booking_details") is not None and request.session.get(
+            "user"
+        ):
+            booking_details = request.session.get("booking_details")
+            user_email = request.session.get("user")["userinfo"]["email"]
+
+            Reservation_request.objects.filter(
+                booking_id=booking_details["booking_id"]
+            ).update(user_email=user_email)
+
+            send_email(
+                booking_details["subject"],
+                booking_details["message"],
+                user_email,
+            )
+
+        return Response("Booking Completed.", status=status.HTTP_201_CREATED)
+
