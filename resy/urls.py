@@ -16,6 +16,7 @@ from .views import (
     BookingListView,
     TestAPI,
     BookingRequest,
+    Add_user,
     # Session_save,
 )
 
@@ -31,6 +32,8 @@ urlpatterns = [
     path("refresh_auth_token", User_auth_token.as_view(), name="refresh_auth_token"),
     path("cancel_booking", Cancel_Booking.as_view(), name="cancel_booking"),
     path("fetch_user", Fetch_user.as_view(), name="fetch_user"),
+    path("add_user", Add_user.as_view(), name="add_user"),
+
     path("fetch_user_new", Fetch_user_new.as_view(), name="fetch_user_new"),    
     path("view_bookings", BookingListView.as_view(), name="view_bookings"),
     path("test_api", TestAPI.as_view(), name="test_api"),
