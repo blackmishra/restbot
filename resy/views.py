@@ -669,21 +669,37 @@ class Add_user(APIView):
         return Response(data={"message": message}, status=req_status)
 
 
-class BookingListView(ListView):
-    model = Reservation_request
-    template_name = "view_bookings.html"
-    context_object_name = "booking_list"
-    # paginate_by = 5
+class BookingListView(APIView):
+    # model = Reservation_request
+    # template_name = "view_bookings.html"
+    # context_object_name = "booking_list"
+    # # paginate_by = 5
 
-    def get_queryset(self):
-        user_details = self.request.session.get("user")
-        if not user_details:
-            return redirect("fetch_user")
+    def format_data(self, data):
+        formatted_data = {}
 
-        if user_details.get("user_email"):
-            user_email = user_details.get("user_email")
-            return Reservation_request.objects.filter(user_email=user_email)
-        return Reservation_request.objects.none()
+        for item in data:
+            print(item)
+            break
+
+
+        return formatted_data
+
+
+    def post(self, request, *args, **kwargs):
+        user_email = self.request.data.get("user_email")
+        print(user_email)
+        if not user_email:
+            return Response("User details not found", status=status.HTTP_400_BAD_REQUEST)
+
+        if user_email:
+            past_reservations = list(Reservation_request.objects.filter(user_email=user_email).order_by('-date', 'from_time').values())
+            print(past_reservations)
+            # self.format_data(Reservation_request)
+
+            
+            return Response(past_reservations, status=status.HTTP_200_OK)
+        return Response("No Past bookings found.", status=status.HTTP_204_NO_CONTENT)
 
 
 class TestAPI(APIView):
@@ -829,7 +845,9 @@ class BookingRequest(APIView):
         rest_id = request.data.get("rest_id")
         reservation_date = request.data.get("reservation_date")
         reservation_date = self.format_dateTime("Date", reservation_date)
-
+        rating = request.data.get("rating")
+        base_img_url = request.data.get("base_img_url")
+        user_email = request.data.get("user_email")
         from_time = request.data.get("time_slot")
         # from_time = self.format_dateTime("Time", from_time)
 
@@ -848,6 +866,10 @@ class BookingRequest(APIView):
             "from_time": from_time,
             "to_time": to_time,
             "booking_id": booking_id,
+            "rating": rating,
+            "base_img_url": base_img_url,
+            "user_email":user_email
+
         }
 
         serializer = BookingSerializer(data=data)

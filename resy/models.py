@@ -70,6 +70,8 @@ class Reservation_request(models.Model):
     booking_id = models.TextField(default="abc")
     rest_name = models.CharField(max_length=180, null=False)
     rest_id = models.IntegerField(null=False, blank=False)
+    base_img_url = models.URLField(max_length=250, default="images/img_rectangle31_230x230.png")
+    rating = models.FloatField(null=True, blank=True, default=4.5 )
     date = models.DateField(null=False, blank=False)
     from_time = models.TimeField(default=time(8, 0))
     to_time = models.TimeField(default=time(8, 0))
