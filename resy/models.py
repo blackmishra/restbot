@@ -40,6 +40,7 @@ class Restaurant(models.Model):
     def __str__(self):
         return self.rest_name
 
+
 class Restaurant_images(models.Model):
     rest_id = models.IntegerField(null=False, blank=False)
     image_url = models.URLField(max_length=250)
@@ -55,23 +56,26 @@ class Restaurant_details(models.Model):
     rest_id = models.IntegerField(primary_key=True, default=0)
     rating = models.FloatField(null=True, blank=True)
     location = models.CharField(max_length=180, null=False, blank=False)
-    description = models.TextField(default='Description not available')
+    description = models.TextField(default="Description not available")
     image = models.URLField(null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.rest_name
+        return f"{self.rest_name}, {self.rest_id}"
+
 
 class Reservation_request(models.Model):
     user_email = models.ForeignKey(
         User, on_delete=models.CASCADE, default="abc@email.com"
     )
-    booking_id = models.TextField(default="abc")
+    booking_id = models.TextField(primary_key=True, default="abc")
     rest_name = models.CharField(max_length=180, null=False)
     rest_id = models.IntegerField(null=False, blank=False)
-    base_img_url = models.URLField(max_length=250, default="images/img_rectangle31_230x230.png")
-    rating = models.FloatField(null=True, blank=True, default=4.5 )
+    base_img_url = models.URLField(
+        max_length=250, default="images/img_rectangle31_230x230.png"
+    )
+    rating = models.FloatField(null=True, blank=True, default=4.5)
     date = models.DateField(null=False, blank=False)
     from_time = models.TimeField(default=time(8, 0))
     to_time = models.TimeField(default=time(8, 0))
@@ -86,7 +90,7 @@ class Reservation_request(models.Model):
         booking_desc = (
             f"Booking of {self.number_of_guests} at {self.rest_name} on {self.date}"
         )
-        return booking_desc
+        return str(self.booking_id) or ''
 
     def get_date_diff(self, date):
         # today = date.today()
@@ -113,7 +117,11 @@ class Reservation_request(models.Model):
 
 class Booking_details(models.Model):
     booking_id = models.ForeignKey(
-        Reservation_request, on_delete=models.CASCADE, blank=True, null=True
+        Reservation_request,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        # to_field="booking_id",
     )
     booking_status = models.CharField(max_length=100, null=False, default="Pending")
     reservation_id = models.TextField(default="abc")
@@ -122,4 +130,4 @@ class Booking_details(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.booking_id
+        return str(self.booking_id) or ''

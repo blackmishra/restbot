@@ -1,6 +1,6 @@
 from datetime import date
 from rest_framework import serializers
-from .models import Resy, Reservation_request, Restaurant, User
+from .models import Booking_details, Resy, Reservation_request, Restaurant, User
 
 
 class ResySerializer(serializers.ModelSerializer):
@@ -48,4 +48,10 @@ class BookingSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
+        fields = "__all__"
+
+
+class Booking_detailsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Booking_details
         fields = "__all__"

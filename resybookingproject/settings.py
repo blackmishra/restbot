@@ -109,7 +109,7 @@ WSGI_APPLICATION = "resybookingproject.wsgi.application"
 
 DATABASES = {
     "default": dj_database_url.config(
-        default="postgresql://shashank:admin1234@localhost:5432/restaurantdb",
+        default="postgresql://shashank:admin1234@localhost:5432/resydb",
         conn_max_age=600,
     )
 }

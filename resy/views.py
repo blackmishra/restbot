@@ -26,7 +26,7 @@ from dateutil import parser as date_parser
 
 from resybookingproject import constants as CONST
 
-from .models import Reservation_request, Restaurant, Resy, User, Restaurant_details
+from .models import Booking_details, Reservation_request, Restaurant, Resy, User, Restaurant_details
 from .serializers import (
     BookingSerializer,
     RestaurantSerializer,
@@ -555,9 +555,9 @@ class User_auth_token(APIView):
 
 
 class Cancel_Booking(APIView):
-    def get(self, request, *args, **kwargs):
-        self.context = {"data": None}
-        return render(request, "cancel_booking.html", self.context)
+    # def get(self, request, *args, **kwargs):
+    #     self.context = {"data": None}
+    #     return render(request, "cancel_booking.html", self.context)
 
     def post(self, request, *args, **kwargs):
         headers = {
@@ -582,29 +582,40 @@ class Cancel_Booking(APIView):
         resy_url = CONST.CANCEL_API
         booking_id = request.data.get("booking_id")
         req = Reservation_request.objects.get(booking_id=booking_id)
-        auth_token = req.user_token
-        reservation_cnf_token = req.reservation_cnf_token
+        print(req)
+        if not req:
+            return Response(data={"message": "Booking not Found"}, status=status.HTTP_404_NOT_FOUND)
+        user = User.objects.get(user_email=req.user_email)
+        print(user)
+        booking_obj = Booking_details.objects.get(booking_id=req.booking_id)
+        print(booking_obj.booking_status)
 
+        reservation_cnf_token = booking_obj.reservation_cnf_token
+        auth_token = user.user_token
+        print(auth_token)
         payload = f"resy_token={reservation_cnf_token}"
         headers["x-resy-auth-token"] = auth_token
         headers["x-resy-universal-auth"] = auth_token
 
         response = requests.request("POST", resy_url, headers=headers, data=payload)
+        print(response)
         if response.status_code == 200:
             subject = "Booking Cancelled Successfully."
             message = f"Your Reservation with Booking-ID: {booking_id}, cancelled successfully."
             req.booking_status = "Cancelled"
             req.save()
-            send_email(subject, message, req.resy_email)
+            booking_obj.booking_status = "Cancelled"
+            booking_obj.save()
+            send_email(subject, message, user.resy_email)
         else:
             message = "Could not cancel the booking. Please try again."
-
-        return render(
-            request,
-            context={"message": message},
-            status=response.status_code,
-            template_name="status.html",
-        )
+        return Response(data={"message": message}, status=response.status_code)
+        # return render(
+        #     request,
+        #     context={"message": message},
+        #     status=response.status_code,
+        #     template_name="status.html",
+        # )
 
 
 class Fetch_user(APIView):
@@ -674,17 +685,6 @@ class BookingListView(APIView):
     # template_name = "view_bookings.html"
     # context_object_name = "booking_list"
     # # paginate_by = 5
-
-    def format_data(self, data):
-        formatted_data = {}
-
-        for item in data:
-            print(item)
-            break
-
-
-        return formatted_data
-
 
     def post(self, request, *args, **kwargs):
         user_email = self.request.data.get("user_email")
@@ -876,8 +876,12 @@ class BookingRequest(APIView):
         context = {}
         print(data)
         if serializer.is_valid():
+            print('This view is called')
             serializer.save()
-
+            req = Reservation_request.objects.get(booking_id=booking_id)
+            print(req.booking_id)
+            booking_obj = Booking_details.objects.create(booking_id=req)
+            booking_obj.save()
             subject = "Booking Request: Successfully created."
             message = f"{subject} \n\n Your Booking ID : {booking_id}. \n\n"
             f"\nYou may receive another notification when your reservation is confirmed. "

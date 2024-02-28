@@ -115,7 +115,7 @@ def make_booking_req():
         payload = {"booking_date": req.date, "rest_id": rest_id}
         response = requests.get(endpoint, data=payload)
         usr = user_objs.filter(user_email=req.user_email).values().first()
-        auth_token = usr['user_token']
+        auth_token = usr["user_token"]
         data = response.json()
 
         # Get Booking Token and try making a reservation.
@@ -146,13 +146,11 @@ def make_booking_req():
                     req.booking_status = "Confirmed"
                     req.save()
 
-                    book_det_obj = Booking_details(
-                        booking_id=req.booking_id,
-                        reservation_id=data["reservation_id"],
-                        booking_status="Confirmed",
-                        reservation_cnf_token=data["resy_token"],
-                    )
-                    book_det_obj.save()
+                    booking_obj = Booking_details(booking_id=req.booking_id)
+                    booking_obj.reservation_id=data["reservation_id"]
+                    booking_obj.booking_status="Confirmed",
+                    booking_obj.reservation_cnf_token=data["resy_token"],
+                    booking_obj.save()
 
                     break
         else:
